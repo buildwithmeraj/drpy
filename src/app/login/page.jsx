@@ -1,18 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
+
+const errorMessages = {
+  AccessDenied: "Access denied. Please try again.",
+  OAuthAccountNotLinked:
+    "This email is linked to a different sign-in method. Try your original provider.",
+  Configuration: "Authentication is not configured correctly.",
+  Verification: "Verification failed. Please sign in again.",
+  Default: "Authentication failed. Please try again.",
+};
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { status } = useSession();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const authError = searchParams.get("error");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace(callbackUrl);
+    }
+  }, [status, router, callbackUrl]);
 
   const handleCredentialsLogin = async (event) => {
     event.preventDefault();
@@ -41,12 +58,22 @@ export default function LoginPage() {
     await signIn("google", { callbackUrl });
   };
 
+  const queryErrorMessage = authError
+    ? errorMessages[authError] || errorMessages.Default
+    : "";
+
+  if (status === "loading" || status === "authenticated") {
+    return <section className="max-w-md mx-auto py-8">Loading...</section>;
+  }
+
   return (
     <section className="max-w-md mx-auto py-8">
       <h2 className="text-center">Login</h2>
 
       <form onSubmit={handleCredentialsLogin} className="card bg-base-200 p-6 gap-4">
-        {error && <p className="text-error text-sm">{error}</p>}
+        {(error || queryErrorMessage) && (
+          <p className="text-error text-sm">{error || queryErrorMessage}</p>
+        )}
 
         <label className="form-control w-full">
           <span className="label-text mb-1">Email</span>

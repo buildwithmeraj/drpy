@@ -27,6 +27,15 @@ const Navbar = () => {
       <div className="hidden md:flex place-self-end items-center gap-1">
         {status === "authenticated" ? (
           <>
+            <Link href="/dashboard" className="mr-2">
+              Dashboard
+            </Link>
+            <Link href="/upload" className="mr-2">
+              Upload
+            </Link>
+            <Link href="/files" className="mr-2">
+              Files
+            </Link>
             <span className="mr-3 text-sm">{session?.user?.email}</span>
             <button
               className="btn btn-sm btn-outline mr-2"

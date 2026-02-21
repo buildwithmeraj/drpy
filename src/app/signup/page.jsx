@@ -1,17 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 
 export default function SignupPage() {
   const router = useRouter();
+  const { status } = useSession();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace("/dashboard");
+    }
+  }, [status, router]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -53,6 +60,10 @@ export default function SignupPage() {
   const handleGoogleSignup = async () => {
     await signIn("google", { callbackUrl: "/" });
   };
+
+  if (status === "loading" || status === "authenticated") {
+    return <section className="max-w-md mx-auto py-8">Loading...</section>;
+  }
 
   return (
     <section className="max-w-md mx-auto py-8">

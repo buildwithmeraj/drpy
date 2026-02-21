@@ -1,17 +1,10 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
-
-export default function ThemeSwitcher() {
-  const { theme, setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
+ 
+function ThemeSwitcherInner() {
+  const { setTheme, resolvedTheme } = useTheme();
   const handleToggle = (e) => {
     setTheme(e.target.checked ? "dark" : "light");
   };
@@ -42,3 +35,9 @@ export default function ThemeSwitcher() {
     </label>
   );
 }
+
+const ThemeSwitcher = dynamic(() => Promise.resolve(ThemeSwitcherInner), {
+  ssr: false,
+});
+
+export default ThemeSwitcher;

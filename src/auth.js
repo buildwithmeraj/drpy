@@ -7,8 +7,13 @@ import bcrypt from "bcryptjs";
 
 export const authOptions = {
   adapter: MongoDBAdapter(clientPromise),
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
   session: {
     strategy: "jwt",
+  },
+  pages: {
+    signIn: "/login",
+    error: "/login",
   },
   providers: [
     Google({
