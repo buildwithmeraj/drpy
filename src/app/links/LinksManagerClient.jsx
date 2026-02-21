@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import BrandedQrCode from "@/components/utilities/BrandedQrCode";
 
 function statusBadge(status) {
   if (status === "active") return "badge-success";
@@ -90,8 +91,7 @@ export default function LinksManagerClient({ initialLinks }) {
       {error && <p className="alert alert-error py-2">{error}</p>}
 
       {sorted.map((link) => {
-        const fullUrl = `${process.env.NEXT_PUBLIC_APP_URL || ""}${link.urlPath}`;
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(fullUrl)}`;
+        const fullUrl = `${window.location.origin}${link.urlPath}`;
 
         return (
           <div key={link.id} className="card bg-base-200 p-4">
@@ -114,8 +114,7 @@ export default function LinksManagerClient({ initialLinks }) {
                 {link.hasPassword && <p className="text-xs badge badge-neutral">Password protected</p>}
               </div>
 
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={qrUrl} alt="QR code" className="rounded-lg border border-base-300" />
+              <BrandedQrCode value={fullUrl} size={120} />
             </div>
 
             <div className="flex flex-wrap gap-2 mt-3">
