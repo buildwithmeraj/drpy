@@ -90,6 +90,7 @@ export default async function DashboardPage() {
             $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
           },
           count: { $sum: 1 },
+          bytes: { $sum: { $ifNull: ["$bytesTransferred", 0] } },
         },
       },
       { $sort: { _id: 1 } },
@@ -97,13 +98,20 @@ export default async function DashboardPage() {
     .toArray();
 
   const countMap = new Map(analyticsRows.map((row) => [row._id, row.count]));
+  const bytesMap = new Map(analyticsRows.map((row) => [row._id, row.bytes || 0]));
   const dailyDownloads = [];
+  const dailyBandwidth = [];
+  let totalBandwidthBytes = 0;
   for (let i = 6; i >= 0; i -= 1) {
     const day = formatDay(dateDaysAgo(i));
     dailyDownloads.push({ day, count: countMap.get(day) || 0 });
+    const bytes = bytesMap.get(day) || 0;
+    totalBandwidthBytes += bytes;
+    dailyBandwidth.push({ day, bytes });
   }
 
   const maxDayCount = Math.max(1, ...dailyDownloads.map((item) => item.count));
+  const maxBandwidth = Math.max(1, ...dailyBandwidth.map((item) => item.bytes));
   const storageUsedBytes = user.storageUsedBytes || 0;
   const storageLimitBytes = user.quotaLimitBytes || 0;
   const storagePercent = storageLimitBytes
@@ -114,7 +122,7 @@ export default async function DashboardPage() {
     <section className="max-w-5xl mx-auto py-8">
       <h2>Dashboard</h2>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
         <div className="card bg-base-200 p-4">
           <p className="text-sm">Files</p>
           <p className="text-2xl font-bold">{fileCount}</p>
@@ -126,6 +134,10 @@ export default async function DashboardPage() {
         <div className="card bg-base-200 p-4">
           <p className="text-sm">Total Downloads</p>
           <p className="text-2xl font-bold">{totalDownloads}</p>
+        </div>
+        <div className="card bg-base-200 p-4">
+          <p className="text-sm">Bandwidth (7d)</p>
+          <p className="text-2xl font-bold">{formatBytes(totalBandwidthBytes)}</p>
         </div>
         <div className="card bg-base-200 p-4">
           <p className="text-sm">Storage Used</p>
@@ -157,6 +169,24 @@ export default async function DashboardPage() {
                 />
               </div>
               <span className="text-sm text-right">{item.count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="card bg-base-200 p-5 mb-4">
+        <h3 className="font-semibold mb-3">Bandwidth (Last 7 Days)</h3>
+        <div className="space-y-2">
+          {dailyBandwidth.map((item) => (
+            <div key={item.day} className="grid grid-cols-[90px_1fr_90px] gap-3 items-center">
+              <span className="text-xs opacity-75">{item.day.slice(5)}</span>
+              <div className="w-full bg-base-300 rounded-full h-2 overflow-hidden">
+                <div
+                  className="h-2 bg-accent rounded-full"
+                  style={{ width: `${(item.bytes / maxBandwidth) * 100}%` }}
+                />
+              </div>
+              <span className="text-sm text-right">{formatBytes(item.bytes)}</span>
             </div>
           ))}
         </div>

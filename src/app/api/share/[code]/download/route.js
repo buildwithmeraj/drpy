@@ -88,6 +88,7 @@ export async function POST(request, { params }) {
       ownerUserId: link.userId || null,
       linkId: link._id.toString(),
       fileId: link.fileId || null,
+      bytesTransferred: file.size || 0,
       ipHash: hashIp(clientIp),
       userAgent,
       createdAt: new Date(),

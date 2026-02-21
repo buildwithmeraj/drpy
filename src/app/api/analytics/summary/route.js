@@ -93,6 +93,7 @@ export async function GET(request) {
               $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
             },
             count: { $sum: 1 },
+            bytes: { $sum: { $ifNull: ["$bytesTransferred", 0] } },
           },
         },
         { $sort: { _id: 1 } },
@@ -100,10 +101,16 @@ export async function GET(request) {
       .toArray();
 
     const countMap = new Map(analyticsRows.map((row) => [row._id, row.count]));
+    const bytesMap = new Map(analyticsRows.map((row) => [row._id, row.bytes || 0]));
     const dailyDownloads = [];
+    const dailyBandwidth = [];
+    let totalBandwidthBytes = 0;
     for (let i = validRangeDays - 1; i >= 0; i -= 1) {
       const day = formatDay(dateDaysAgo(i));
       dailyDownloads.push({ day, count: countMap.get(day) || 0 });
+      const bytes = bytesMap.get(day) || 0;
+      totalBandwidthBytes += bytes;
+      dailyBandwidth.push({ day, bytes });
     }
 
     return Response.json({
@@ -112,10 +119,12 @@ export async function GET(request) {
         fileCount,
         activeLinkCount,
         totalDownloads,
+        totalBandwidthBytes,
         storageUsedBytes: user.storageUsedBytes || 0,
         storageLimitBytes: user.quotaLimitBytes || 0,
       },
       dailyDownloads,
+      dailyBandwidth,
       rangeDays: validRangeDays,
       topLinks: topLinks.map((link) => ({
         code: link.code,

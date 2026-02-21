@@ -15,8 +15,22 @@ export default function UploadPage() {
   const [file, setFile] = useState(null);
   const [folder, setFolder] = useState("root");
   const [isUploading, setIsUploading] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const applySelectedFile = (selectedFile) => {
+    setError("");
+    setSuccess("");
+    setFile(selectedFile || null);
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    setDragging(false);
+    const selectedFile = event.dataTransfer?.files?.[0] || null;
+    applySelectedFile(selectedFile);
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -60,14 +74,31 @@ export default function UploadPage() {
 
         <label className="form-control">
           <span className="label-text mb-2">Choose file (max 100MB)</span>
-          <input
-            type="file"
-            className="file-input file-input-bordered w-full"
-            onChange={(event) => {
-              const selectedFile = event.target.files?.[0] || null;
-              setFile(selectedFile);
+          <div
+            className={`border-2 border-dashed rounded-2xl p-6 text-center transition ${
+              dragging ? "border-primary bg-base-100" : "border-base-300 bg-base-100/60"
+            }`}
+            onDragOver={(event) => {
+              event.preventDefault();
+              setDragging(true);
             }}
-          />
+            onDragLeave={(event) => {
+              event.preventDefault();
+              setDragging(false);
+            }}
+            onDrop={handleDrop}
+          >
+            <p className="font-medium mb-2">Drag and drop file here</p>
+            <p className="text-sm opacity-70 mb-4">or choose from your device</p>
+            <input
+              type="file"
+              className="file-input file-input-bordered w-full"
+              onChange={(event) => {
+                const selectedFile = event.target.files?.[0] || null;
+                applySelectedFile(selectedFile);
+              }}
+            />
+          </div>
         </label>
 
         <label className="form-control">
