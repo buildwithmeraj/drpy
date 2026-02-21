@@ -1,30 +1,46 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
-import clientPromise from "@/lib/mongodb";
+import { getDb } from "@/lib/db";
 import { resolveSessionUser } from "@/lib/userQuota";
+import { normalizeFolder } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
-export async function GET() {
+export async function GET(request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return Response.json({ error: "Unauthorized." }, { status: 401 });
     }
 
-    const client = await clientPromise;
-    const db = client.db();
+    const db = await getDb();
     const user = await resolveSessionUser(db, session.user);
 
     if (!user) {
       return Response.json({ error: "User not found." }, { status: 404 });
     }
 
-    const files = await db
-      .collection("files")
-      .find({ userId: user._id.toString() })
-      .sort({ createdAt: -1 })
-      .toArray();
+    const search = request.nextUrl.searchParams.get("search")?.trim() || "";
+    const folderParam = request.nextUrl.searchParams.get("folder");
+    const sortBy = request.nextUrl.searchParams.get("sortBy") || "createdAt";
+    const sortOrder = request.nextUrl.searchParams.get("sortOrder") === "asc" ? 1 : -1;
+
+    const query = { userId: user._id.toString() };
+    if (folderParam && folderParam !== "all") {
+      query.folder = normalizeFolder(folderParam);
+    }
+    if (search) {
+      query.originalName = { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" };
+    }
+
+    const sortFieldMap = {
+      createdAt: "createdAt",
+      name: "originalName",
+      size: "size",
+      folder: "folder",
+    };
+    const sortField = sortFieldMap[sortBy] || "createdAt";
+    const files = await db.collection("files").find(query).sort({ [sortField]: sortOrder }).toArray();
 
     return Response.json({
       ok: true,
@@ -35,6 +51,7 @@ export async function GET() {
         size: file.size,
         key: file.key,
         publicUrl: file.publicUrl || null,
+        folder: file.folder || "root",
         createdAt: file.createdAt,
       })),
       quota: {

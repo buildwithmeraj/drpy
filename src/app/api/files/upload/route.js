@@ -2,13 +2,14 @@ import { randomUUID } from "crypto";
 import { getServerSession } from "next-auth";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { authOptions } from "@/auth";
-import clientPromise from "@/lib/mongodb";
+import { getDb } from "@/lib/db";
 import { getR2BucketName, getR2Client, getR2PublicBaseUrl } from "@/lib/r2";
+import { assertCsrf } from "@/lib/security";
+import { validateUploadPolicy } from "@/lib/uploadPolicy";
 import { resolveSessionUser } from "@/lib/userQuota";
+import { normalizeFolder } from "@/lib/validation";
 
 export const runtime = "nodejs";
-
-const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024;
 
 function safeFilename(name) {
   return name.replace(/[^\w.\-]/g, "_");
@@ -16,6 +17,9 @@ function safeFilename(name) {
 
 export async function POST(request) {
   try {
+    const csrfError = assertCsrf(request);
+    if (csrfError) return csrfError;
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return Response.json({ error: "Unauthorized." }, { status: 401 });
@@ -23,24 +27,13 @@ export async function POST(request) {
 
     const formData = await request.formData();
     const file = formData.get("file");
-
-    if (!(file instanceof File)) {
-      return Response.json({ error: "No file provided." }, { status: 400 });
+    const folder = normalizeFolder(formData.get("folder"));
+    const policy = validateUploadPolicy(file);
+    if (!policy.ok) {
+      return Response.json({ error: policy.error }, { status: 400 });
     }
 
-    if (file.size <= 0) {
-      return Response.json({ error: "File is empty." }, { status: 400 });
-    }
-
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      return Response.json(
-        { error: "File exceeds 100MB upload limit." },
-        { status: 400 },
-      );
-    }
-
-    const client = await clientPromise;
-    const db = client.db();
+    const db = await getDb();
     const user = await resolveSessionUser(db, session.user);
 
     if (!user) {
@@ -58,7 +51,7 @@ export async function POST(request) {
     }
 
     const bucketName = getR2BucketName();
-    const contentType = file.type || "application/octet-stream";
+    const contentType = policy.mimeType;
     const safeName = safeFilename(file.name);
     const key = `${user._id.toString()}/${Date.now()}-${randomUUID()}-${safeName}`;
     const body = Buffer.from(await file.arrayBuffer());
@@ -86,6 +79,7 @@ export async function POST(request) {
       key,
       bucket: bucketName,
       publicUrl,
+      folder,
       createdAt,
       updatedAt: createdAt,
     });
@@ -108,6 +102,7 @@ export async function POST(request) {
           size: file.size,
           key,
           publicUrl,
+          folder,
           createdAt,
         },
       },

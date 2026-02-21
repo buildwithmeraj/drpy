@@ -13,6 +13,7 @@ function formatBytes(bytes) {
 
 export default function UploadPage() {
   const [file, setFile] = useState(null);
+  const [folder, setFolder] = useState("root");
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -29,6 +30,7 @@ export default function UploadPage() {
 
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("folder", folder);
 
     setIsUploading(true);
 
@@ -65,6 +67,17 @@ export default function UploadPage() {
               const selectedFile = event.target.files?.[0] || null;
               setFile(selectedFile);
             }}
+          />
+        </label>
+
+        <label className="form-control">
+          <span className="label-text mb-2">Folder</span>
+          <input
+            type="text"
+            className="input input-bordered"
+            value={folder}
+            onChange={(event) => setFolder(event.target.value)}
+            placeholder="root"
           />
         </label>
 

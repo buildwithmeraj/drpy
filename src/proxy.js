@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-const protectedPrefixes = ["/dashboard", "/upload", "/files"];
+const protectedPrefixes = ["/dashboard", "/upload", "/files", "/links"];
 const authRoutes = ["/login", "/signup"];
 
 // Rename 'middleware' to 'proxy'
@@ -40,6 +40,7 @@ export const config = {
     "/dashboard/:path*",
     "/upload/:path*",
     "/files/:path*",
+    "/links/:path*",
     "/login",
     "/signup",
   ],

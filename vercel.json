@@ -3,6 +3,10 @@
     {
       "path": "/api/jobs/cleanup-expired-links",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/jobs/cleanup-orphan-files",
+      "schedule": "15 3 * * *"
     }
   ]
 }

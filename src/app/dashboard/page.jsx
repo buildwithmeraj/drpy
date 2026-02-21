@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { dateDaysAgo, formatBytes, formatDay } from "@/lib/analytics";
-import clientPromise from "@/lib/mongodb";
+import { getDb } from "@/lib/db";
 import { resolveSessionUser } from "@/lib/userQuota";
 
 export const metadata = {
@@ -17,8 +17,7 @@ export default async function DashboardPage() {
     redirect("/login?callbackUrl=/dashboard");
   }
 
-  const client = await clientPromise;
-  const db = client.db();
+  const db = await getDb();
   const user = await resolveSessionUser(db, session.user);
 
   if (!user) {
@@ -33,6 +32,46 @@ export default async function DashboardPage() {
     .find({ userId }, { projection: { downloadCount: 1 } })
     .toArray();
   const totalDownloads = links.reduce((sum, link) => sum + (link.downloadCount || 0), 0);
+  const topLinks = await db
+    .collection("links")
+    .aggregate([
+      { $match: { userId } },
+      { $sort: { downloadCount: -1, createdAt: -1 } },
+      { $limit: 5 },
+      {
+        $lookup: {
+          from: "files",
+          let: { fileObjectId: { $toObjectId: "$fileId" } },
+          pipeline: [{ $match: { $expr: { $eq: ["$_id", "$$fileObjectId"] } } }],
+          as: "file",
+        },
+      },
+      { $unwind: { path: "$file", preserveNullAndEmptyArrays: true } },
+    ])
+    .toArray();
+  const topFiles = await db
+    .collection("links")
+    .aggregate([
+      { $match: { userId } },
+      {
+        $group: {
+          _id: "$fileId",
+          downloadCount: { $sum: "$downloadCount" },
+        },
+      },
+      { $sort: { downloadCount: -1 } },
+      { $limit: 5 },
+      {
+        $lookup: {
+          from: "files",
+          let: { fileObjectId: { $toObjectId: "$_id" } },
+          pipeline: [{ $match: { $expr: { $eq: ["$_id", "$$fileObjectId"] } } }],
+          as: "file",
+        },
+      },
+      { $unwind: { path: "$file", preserveNullAndEmptyArrays: true } },
+    ])
+    .toArray();
 
   const startDate = dateDaysAgo(6);
   const analyticsRows = await db
@@ -121,6 +160,43 @@ export default async function DashboardPage() {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-4 mb-4">
+        <div className="card bg-base-200 p-5">
+          <h3 className="font-semibold mb-3">Top Downloaded Links</h3>
+          <div className="space-y-2 text-sm">
+            {topLinks.length ? (
+              topLinks.map((row) => (
+                <p key={row.code} className="flex justify-between gap-3">
+                  <span className="truncate">{row.file?.originalName || "Unknown file"}</span>
+                  <span className="font-semibold">{row.downloadCount || 0}</span>
+                </p>
+              ))
+            ) : (
+              <p className="opacity-70">No downloads yet.</p>
+            )}
+          </div>
+        </div>
+        <div className="card bg-base-200 p-5">
+          <h3 className="font-semibold mb-3">Top Downloaded Files</h3>
+          <div className="space-y-2 text-sm">
+            {topFiles.length ? (
+              topFiles.map((row) => (
+                <p key={row._id} className="flex justify-between gap-3">
+                  <span className="truncate">{row.file?.originalName || "Unknown file"}</span>
+                  <span className="font-semibold">{row.downloadCount || 0}</span>
+                </p>
+              ))
+            ) : (
+              <p className="opacity-70">No downloads yet.</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="alert alert-info mb-4">
+        Expired links are cleaned up automatically. Files are retained by default unless orphan cleanup is enabled.
       </div>
 
       <div className="card bg-base-200 p-6 gap-3">

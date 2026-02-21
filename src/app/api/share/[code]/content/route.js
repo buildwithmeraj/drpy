@@ -2,15 +2,10 @@ import bcrypt from "bcryptjs";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/db";
-import { hashIp } from "@/lib/analytics";
 import { getR2BucketName, getR2Client } from "@/lib/r2";
 import { getShareMetaByCode } from "@/lib/shareLookup";
 
 export const runtime = "nodejs";
-
-function sanitizeFilename(filename) {
-  return filename.replace(/["\\\r\n]/g, "_");
-}
 
 export async function POST(request, { params }) {
   try {
@@ -23,7 +18,6 @@ export async function POST(request, { params }) {
     const password = body?.password?.trim() || "";
 
     const db = await getDb();
-
     const link = await db.collection("links").findOne({ code });
     if (!link) {
       return Response.json({ error: "Link not found." }, { status: 404 });
@@ -38,7 +32,6 @@ export async function POST(request, { params }) {
       if (!password) {
         return Response.json({ error: "Password required." }, { status: 401 });
       }
-
       const isPasswordValid = await bcrypt.compare(password, link.passwordHash || "");
       if (!isPasswordValid) {
         return Response.json({ error: "Invalid password." }, { status: 401 });
@@ -71,45 +64,17 @@ export async function POST(request, { params }) {
         ? object.Body.transformToWebStream()
         : object.Body;
 
-    await db.collection("links").updateOne(
-      { _id: link._id },
-      {
-        $inc: { downloadCount: 1 },
-        $set: { updatedAt: new Date(), lastDownloadedAt: new Date() },
-      },
-    );
-
-    const forwardedFor = request.headers.get("x-forwarded-for");
-    const clientIp = forwardedFor?.split(",")?.[0]?.trim() || request.headers.get("x-real-ip");
-    const userAgent = request.headers.get("user-agent") || "";
-
-    await db.collection("analytics").insertOne({
-      eventType: "download",
-      ownerUserId: link.userId || null,
-      linkId: link._id.toString(),
-      fileId: link.fileId || null,
-      ipHash: hashIp(clientIp),
-      userAgent,
-      createdAt: new Date(),
-    });
-
-    const headers = {
-      "Content-Type": file.mimeType || "application/octet-stream",
-      "Content-Disposition": `attachment; filename="${sanitizeFilename(file.originalName || "download")}"`,
-    };
-
-    if (typeof file.size === "number" && file.size > 0) {
-      headers["Content-Length"] = String(file.size);
-    }
-
     return new Response(stream, {
       status: 200,
-      headers,
+      headers: {
+        "Content-Type": file.mimeType || "application/octet-stream",
+        "Cache-Control": "private, max-age=60",
+      },
     });
   } catch (error) {
     return Response.json(
       {
-        error: "Could not download file.",
+        error: "Could not load preview content.",
         details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 },

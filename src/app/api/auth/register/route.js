@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
-import clientPromise from "@/lib/mongodb";
+import { getDb } from "@/lib/db";
+import { assertCsrf } from "@/lib/security";
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -7,6 +8,9 @@ function isValidEmail(email) {
 
 export async function POST(request) {
   try {
+    const csrfError = assertCsrf(request);
+    if (csrfError) return csrfError;
+
     const body = await request.json();
     const name = body?.name?.trim();
     const email = body?.email?.toLowerCase()?.trim();
@@ -30,8 +34,7 @@ export async function POST(request) {
       );
     }
 
-    const client = await clientPromise;
-    const db = client.db();
+    const db = await getDb();
     const users = db.collection("users");
 
     const existingUser = await users.findOne({ email });

@@ -11,6 +11,7 @@ export default function CreateShareLinkButton({ fileId }) {
   const [isOpen, setIsOpen] = useState(false);
   const [password, setPassword] = useState("");
   const [expiryDateTime, setExpiryDateTime] = useState("");
+  const [deleteAfterDownloads, setDeleteAfterDownloads] = useState(false);
   const [maxDownloads, setMaxDownloads] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -32,6 +33,7 @@ export default function CreateShareLinkButton({ fileId }) {
         fileId,
         password,
         expiryHours,
+        deleteAfterDownloads,
         maxDownloads,
       }),
     });
@@ -94,17 +96,29 @@ export default function CreateShareLinkButton({ fileId }) {
               />
             </label>
 
-            <label className="form-control">
-              <span className="label-text mb-1">Max downloads (optional)</span>
+            <label className="label cursor-pointer justify-start gap-2">
               <input
-                type="number"
-                min="1"
-                className="input input-bordered w-full"
-                value={maxDownloads}
-                onChange={(event) => setMaxDownloads(event.target.value)}
-                placeholder="Unlimited"
+                type="checkbox"
+                className="checkbox checkbox-sm"
+                checked={deleteAfterDownloads}
+                onChange={(event) => setDeleteAfterDownloads(event.target.checked)}
               />
+              <span className="label-text">Delete link after X downloads</span>
             </label>
+
+            {deleteAfterDownloads && (
+              <label className="form-control">
+                <span className="label-text mb-1">Max downloads</span>
+                <input
+                  type="number"
+                  min="1"
+                  className="input input-bordered w-full"
+                  value={maxDownloads}
+                  onChange={(event) => setMaxDownloads(event.target.value)}
+                  placeholder="e.g. 10"
+                />
+              </label>
+            )}
 
             {shareLink && (
               <div className="bg-base-200 rounded-xl p-3 text-sm break-all">

@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
-import clientPromise from "@/lib/mongodb";
 import { dateDaysAgo, formatDay } from "@/lib/analytics";
+import { getDb } from "@/lib/db";
 import { resolveSessionUser } from "@/lib/userQuota";
 
 export const runtime = "nodejs";
@@ -17,8 +17,7 @@ export async function GET(request) {
     const rangeDays = Number.parseInt(rangeParam || "7", 10);
     const validRangeDays = [7, 30].includes(rangeDays) ? rangeDays : 7;
 
-    const client = await clientPromise;
-    const db = client.db();
+    const db = await getDb();
     const user = await resolveSessionUser(db, session.user);
 
     if (!user) {
@@ -34,6 +33,48 @@ export async function GET(request) {
       .find({ userId }, { projection: { downloadCount: 1 } })
       .toArray();
     const totalDownloads = links.reduce((sum, link) => sum + (link.downloadCount || 0), 0);
+
+    const topLinks = await db
+      .collection("links")
+      .aggregate([
+        { $match: { userId } },
+        { $sort: { downloadCount: -1, createdAt: -1 } },
+        { $limit: 5 },
+        {
+          $lookup: {
+            from: "files",
+            let: { fileObjectId: { $toObjectId: "$fileId" } },
+            pipeline: [{ $match: { $expr: { $eq: ["$_id", "$$fileObjectId"] } } }],
+            as: "file",
+          },
+        },
+        { $unwind: { path: "$file", preserveNullAndEmptyArrays: true } },
+      ])
+      .toArray();
+
+    const topFiles = await db
+      .collection("links")
+      .aggregate([
+        { $match: { userId } },
+        {
+          $group: {
+            _id: "$fileId",
+            downloadCount: { $sum: "$downloadCount" },
+          },
+        },
+        { $sort: { downloadCount: -1 } },
+        { $limit: 5 },
+        {
+          $lookup: {
+            from: "files",
+            let: { fileObjectId: { $toObjectId: "$_id" } },
+            pipeline: [{ $match: { $expr: { $eq: ["$_id", "$$fileObjectId"] } } }],
+            as: "file",
+          },
+        },
+        { $unwind: { path: "$file", preserveNullAndEmptyArrays: true } },
+      ])
+      .toArray();
 
     const startDate = dateDaysAgo(validRangeDays - 1);
     const analyticsRows = await db
@@ -76,6 +117,17 @@ export async function GET(request) {
       },
       dailyDownloads,
       rangeDays: validRangeDays,
+      topLinks: topLinks.map((link) => ({
+        code: link.code,
+        urlPath: `/s/${link.code}`,
+        fileName: link.file?.originalName || "Unknown file",
+        downloadCount: link.downloadCount || 0,
+      })),
+      topFiles: topFiles.map((file) => ({
+        fileId: file._id,
+        fileName: file.file?.originalName || "Unknown file",
+        downloadCount: file.downloadCount || 0,
+      })),
     });
   } catch (error) {
     return Response.json(

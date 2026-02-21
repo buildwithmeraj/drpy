@@ -36,6 +36,9 @@ const Navbar = () => {
             <Link href="/files" className="mr-2">
               Files
             </Link>
+            <Link href="/links" className="mr-2">
+              Links
+            </Link>
             <span className="mr-3 text-sm">{session?.user?.email}</span>
             <button
               className="btn btn-sm btn-outline mr-2"

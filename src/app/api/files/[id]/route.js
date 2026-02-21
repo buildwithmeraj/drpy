@@ -2,14 +2,19 @@ import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { ObjectId } from "mongodb";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
-import clientPromise from "@/lib/mongodb";
+import { getDb } from "@/lib/db";
 import { getR2BucketName, getR2Client } from "@/lib/r2";
+import { assertCsrf } from "@/lib/security";
+import { normalizeFolder } from "@/lib/validation";
 import { resolveSessionUser } from "@/lib/userQuota";
 
 export const runtime = "nodejs";
 
 export async function DELETE(_request, { params }) {
   try {
+    const csrfError = assertCsrf(_request);
+    if (csrfError) return csrfError;
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return Response.json({ error: "Unauthorized." }, { status: 401 });
@@ -20,8 +25,7 @@ export async function DELETE(_request, { params }) {
       return Response.json({ error: "Invalid file id." }, { status: 400 });
     }
 
-    const client = await clientPromise;
-    const db = client.db();
+    const db = await getDb();
     const user = await resolveSessionUser(db, session.user);
 
     if (!user) {
@@ -62,6 +66,51 @@ export async function DELETE(_request, { params }) {
     return Response.json(
       {
         error: "Could not delete file.",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    );
+  }
+}
+
+export async function PATCH(request, { params }) {
+  try {
+    const csrfError = assertCsrf(request);
+    if (csrfError) return csrfError;
+
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return Response.json({ error: "Unauthorized." }, { status: 401 });
+    }
+
+    const { id: fileId } = await params;
+    if (!fileId || !ObjectId.isValid(fileId)) {
+      return Response.json({ error: "Invalid file id." }, { status: 400 });
+    }
+
+    const body = await request.json();
+    const folder = normalizeFolder(body?.folder);
+
+    const db = await getDb();
+    const user = await resolveSessionUser(db, session.user);
+    if (!user) {
+      return Response.json({ error: "User not found." }, { status: 404 });
+    }
+
+    const result = await db.collection("files").updateOne(
+      { _id: new ObjectId(fileId), userId: user._id.toString() },
+      { $set: { folder, updatedAt: new Date() } },
+    );
+
+    if (!result.matchedCount) {
+      return Response.json({ error: "File not found." }, { status: 404 });
+    }
+
+    return Response.json({ ok: true, folder });
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Could not update file.",
         details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 },

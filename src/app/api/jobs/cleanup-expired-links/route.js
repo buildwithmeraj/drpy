@@ -1,4 +1,7 @@
-import clientPromise from "@/lib/mongodb";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { ObjectId } from "mongodb";
+import { getDb } from "@/lib/db";
+import { getR2BucketName, getR2Client } from "@/lib/r2";
 
 export const runtime = "nodejs";
 
@@ -20,8 +23,7 @@ async function runCleanup(request) {
     }
 
     const now = new Date();
-    const client = await clientPromise;
-    const db = client.db();
+    const db = await getDb();
 
     const result = await db.collection("links").deleteMany({
       $or: [
@@ -35,9 +37,78 @@ async function runCleanup(request) {
       ],
     });
 
+    const deleteOrphans = String(process.env.DELETE_ORPHAN_FILES_ON_CLEANUP || "false") === "true";
+    let orphanDeletedCount = 0;
+
+    if (deleteOrphans) {
+      const retentionDays = Number.parseInt(process.env.ORPHAN_FILE_RETENTION_DAYS || "30", 10);
+      const cutoff = new Date(Date.now() - (Number.isFinite(retentionDays) ? retentionDays : 30) * 86400000);
+
+      const orphanFiles = await db
+        .collection("files")
+        .aggregate([
+          { $match: { createdAt: { $lte: cutoff } } },
+          {
+            $lookup: {
+              from: "links",
+              let: { fileIdString: { $toString: "$_id" } },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: { $eq: ["$fileId", "$$fileIdString"] },
+                  },
+                },
+              ],
+              as: "activeLinksRaw",
+            },
+          },
+          {
+            $addFields: {
+              activeLinks: {
+                $filter: {
+                  input: "$activeLinksRaw",
+                  as: "link",
+                  cond: { $gt: ["$$link.expiresAt", now] },
+                },
+              },
+            },
+          },
+          { $match: { activeLinks: { $size: 0 } } },
+        ])
+        .toArray();
+
+      if (orphanFiles.length) {
+        const r2Client = getR2Client();
+        const bucket = getR2BucketName();
+
+        for (const file of orphanFiles) {
+          await r2Client.send(
+            new DeleteObjectCommand({
+              Bucket: bucket,
+              Key: file.key,
+            }),
+          );
+
+          await db.collection("files").deleteOne({ _id: file._id });
+          await db.collection("users").updateOne(
+            {
+              _id:
+                typeof file.userId === "string" && ObjectId.isValid(file.userId)
+                  ? new ObjectId(file.userId)
+                  : file.userId,
+            },
+            { $inc: { storageUsedBytes: -(file.size || 0) }, $set: { updatedAt: new Date() } },
+          );
+        }
+
+        orphanDeletedCount = orphanFiles.length;
+      }
+    }
+
     return Response.json({
       ok: true,
       deletedCount: result.deletedCount || 0,
+      orphanDeletedCount,
       ranAt: now.toISOString(),
     });
   } catch (error) {

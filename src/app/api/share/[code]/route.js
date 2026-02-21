@@ -1,4 +1,4 @@
-import clientPromise from "@/lib/mongodb";
+import { getDb } from "@/lib/db";
 import { getShareMetaByCode } from "@/lib/shareLookup";
 
 export const runtime = "nodejs";
@@ -10,8 +10,7 @@ export async function GET(_request, { params }) {
       return Response.json({ error: "Invalid link." }, { status: 400 });
     }
 
-    const client = await clientPromise;
-    const db = client.db();
+    const db = await getDb();
 
     const meta = await getShareMetaByCode(db, code);
     if (meta.status !== 200) {
