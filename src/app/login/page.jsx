@@ -1,0 +1,95 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
+
+export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleCredentialsLogin = async (event) => {
+    event.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+      callbackUrl,
+    });
+
+    setIsLoading(false);
+
+    if (result?.error) {
+      setError("Invalid email or password.");
+      return;
+    }
+
+    router.push(result?.url || callbackUrl);
+    router.refresh();
+  };
+
+  const handleGoogleLogin = async () => {
+    await signIn("google", { callbackUrl });
+  };
+
+  return (
+    <section className="max-w-md mx-auto py-8">
+      <h2 className="text-center">Login</h2>
+
+      <form onSubmit={handleCredentialsLogin} className="card bg-base-200 p-6 gap-4">
+        {error && <p className="text-error text-sm">{error}</p>}
+
+        <label className="form-control w-full">
+          <span className="label-text mb-1">Email</span>
+          <input
+            type="email"
+            className="input input-bordered w-full"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
+        </label>
+
+        <label className="form-control w-full">
+          <span className="label-text mb-1">Password</span>
+          <input
+            type="password"
+            className="input input-bordered w-full"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+            minLength={8}
+          />
+        </label>
+
+        <button type="submit" className="btn btn-primary w-full" disabled={isLoading}>
+          {isLoading ? "Logging in..." : "Login"}
+        </button>
+
+        <button
+          type="button"
+          className="btn btn-outline w-full"
+          onClick={handleGoogleLogin}
+        >
+          Continue with Google
+        </button>
+
+        <p className="text-sm text-center">
+          No account yet?{" "}
+          <Link className="link link-primary" href="/signup">
+            Sign up
+          </Link>
+        </p>
+      </form>
+    </section>
+  );
+}

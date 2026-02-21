@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
 import ThemeProvider from "@/providers/ThemeProvider";
+import AuthProvider from "@/providers/AuthProvider";
 
 const geist = Geist({ subsets: ["latin"] });
 const geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -18,13 +19,15 @@ export default function RootLayout({ children }) {
       <body
         className={`${geist.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen overflow-x-hidden`}
       >
-        <ThemeProvider>
-          <Navbar />
-          <main className="container mx-auto mt-18 px-4 mb-6 lg:mb-4 flex-1">
-            {children}
-          </main>
-          <Footer />
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <Navbar />
+            <main className="container mx-auto mt-18 px-4 mb-6 lg:mb-4 flex-1">
+              {children}
+            </main>
+            <Footer />
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
