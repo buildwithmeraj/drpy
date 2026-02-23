@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/db";
-import { getR2BucketName, getR2Client } from "@/lib/r2";
+import { resolveR2ForFile } from "@/lib/r2";
 import { getShareMetaByCode } from "@/lib/shareLookup";
 
 export const runtime = "nodejs";
@@ -47,10 +47,10 @@ export async function POST(request, { params }) {
       return Response.json({ error: "File no longer exists." }, { status: 404 });
     }
 
-    const r2Client = getR2Client();
-    const object = await r2Client.send(
+    const storage = resolveR2ForFile(file);
+    const object = await storage.client.send(
       new GetObjectCommand({
-        Bucket: getR2BucketName(),
+        Bucket: storage.bucketName,
         Key: file.key,
       }),
     );

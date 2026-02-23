@@ -13,7 +13,7 @@ function formatBytes(bytes) {
 
 export default function UploadPage() {
   const [file, setFile] = useState(null);
-  const [folder, setFolder] = useState("root");
+  const [folder, setFolder] = useState("/");
   const [isUploading, setIsUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState("");
@@ -108,7 +108,7 @@ export default function UploadPage() {
             className="input input-bordered"
             value={folder}
             onChange={(event) => setFolder(event.target.value)}
-            placeholder="root"
+            placeholder="/"
           />
         </label>
 

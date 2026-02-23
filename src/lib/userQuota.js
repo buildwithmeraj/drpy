@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 
-const DEFAULT_QUOTA_BYTES = 5 * 1024 * 1024 * 1024;
+import { DEFAULT_QUOTA_BYTES } from "@/lib/quota";
 
 export async function resolveSessionUser(db, sessionUser) {
   const users = db.collection("users");
@@ -23,7 +23,7 @@ export async function resolveSessionUser(db, sessionUser) {
 
   const missingFields = {};
 
-  if (typeof user.quotaLimitBytes !== "number") {
+  if (typeof user.quotaLimitBytes !== "number" || user.quotaLimitBytes !== DEFAULT_QUOTA_BYTES) {
     missingFields.quotaLimitBytes = DEFAULT_QUOTA_BYTES;
   }
 

@@ -19,11 +19,13 @@ export function isValidObjectId(value) {
 }
 
 export function normalizeFolder(folder) {
-  if (typeof folder !== "string" || !folder.trim()) return "root";
+  if (typeof folder !== "string" || !folder.trim()) return "/";
   const cleaned = folder
     .trim()
     .replace(/\\/g, "/")
     .replace(/\/+/g, "/")
     .replace(/^\/|\/$/g, "");
-  return cleaned || "root";
+  if (!cleaned) return "/";
+  if (cleaned.toLowerCase() === "root") return "/";
+  return cleaned;
 }

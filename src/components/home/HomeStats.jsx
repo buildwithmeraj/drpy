@@ -1,5 +1,7 @@
+import { DEFAULT_QUOTA_BYTES, formatQuotaBytes } from "@/lib/quota";
+
 const stats = [
-  { label: "Free Storage", value: "5GB" },
+  { label: "Free Storage", value: formatQuotaBytes(DEFAULT_QUOTA_BYTES) },
   { label: "Expiry Window", value: "1h - 30d" },
   { label: "Share Controls", value: "Password + Limits" },
   { label: "Cleanup", value: "Auto Scheduled" },

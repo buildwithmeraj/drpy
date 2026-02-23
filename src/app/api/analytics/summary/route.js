@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { dateDaysAgo, formatDay } from "@/lib/analytics";
 import { getDb } from "@/lib/db";
+import { DEFAULT_QUOTA_BYTES } from "@/lib/quota";
 import { resolveSessionUser } from "@/lib/userQuota";
 
 export const runtime = "nodejs";
@@ -121,7 +122,7 @@ export async function GET(request) {
         totalDownloads,
         totalBandwidthBytes,
         storageUsedBytes: user.storageUsedBytes || 0,
-        storageLimitBytes: user.quotaLimitBytes || 0,
+        storageLimitBytes: user.quotaLimitBytes || DEFAULT_QUOTA_BYTES,
       },
       dailyDownloads,
       dailyBandwidth,

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DEFAULT_QUOTA_BYTES, formatQuotaBytes } from "@/lib/quota";
 
 export default function HomePricing() {
   return (
@@ -11,7 +12,7 @@ export default function HomePricing() {
           <p className="opacity-70 mb-1">for personal use</p>
         </div>
         <ul className="mt-4 space-y-2 text-sm">
-          <li>5GB storage quota with enforcement</li>
+          <li>{formatQuotaBytes(DEFAULT_QUOTA_BYTES)} storage quota with enforcement</li>
           <li>Temporary links with expiry, password, and limits</li>
           <li>File manager, folders, search, bulk actions</li>
           <li>Dashboard analytics and bandwidth tracking</li>

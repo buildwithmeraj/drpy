@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { dateDaysAgo, formatBytes, formatDay } from "@/lib/analytics";
 import { getDb } from "@/lib/db";
+import { DEFAULT_QUOTA_BYTES } from "@/lib/quota";
 import { resolveSessionUser } from "@/lib/userQuota";
 
 export const metadata = {
@@ -113,7 +114,7 @@ export default async function DashboardPage() {
   const maxDayCount = Math.max(1, ...dailyDownloads.map((item) => item.count));
   const maxBandwidth = Math.max(1, ...dailyBandwidth.map((item) => item.bytes));
   const storageUsedBytes = user.storageUsedBytes || 0;
-  const storageLimitBytes = user.quotaLimitBytes || 0;
+  const storageLimitBytes = user.quotaLimitBytes || DEFAULT_QUOTA_BYTES;
   const storagePercent = storageLimitBytes
     ? Math.min(100, (storageUsedBytes / storageLimitBytes) * 100)
     : 0;

@@ -3,7 +3,7 @@ import { ObjectId } from "mongodb";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { getDb } from "@/lib/db";
-import { getR2BucketName, getR2Client } from "@/lib/r2";
+import { resolveR2ForFile } from "@/lib/r2";
 import { assertCsrf } from "@/lib/security";
 import { resolveSessionUser } from "@/lib/userQuota";
 
@@ -43,12 +43,11 @@ export async function POST(request) {
       return Response.json({ error: "No files matched." }, { status: 404 });
     }
 
-    const r2Client = getR2Client();
-    const bucket = getR2BucketName();
     for (const file of files) {
-      await r2Client.send(
+      const storage = resolveR2ForFile(file);
+      await storage.client.send(
         new DeleteObjectCommand({
-          Bucket: bucket,
+          Bucket: storage.bucketName,
           Key: file.key,
         }),
       );

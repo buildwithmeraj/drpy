@@ -1,7 +1,7 @@
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/db";
-import { getR2BucketName, getR2Client } from "@/lib/r2";
+import { resolveR2ForFile } from "@/lib/r2";
 
 export const runtime = "nodejs";
 
@@ -69,12 +69,11 @@ async function runCleanup(request) {
       });
     }
 
-    const r2Client = getR2Client();
-    const bucket = getR2BucketName();
     for (const file of orphanFiles) {
-      await r2Client.send(
+      const storage = resolveR2ForFile(file);
+      await storage.client.send(
         new DeleteObjectCommand({
-          Bucket: bucket,
+          Bucket: storage.bucketName,
           Key: file.key,
         }),
       );

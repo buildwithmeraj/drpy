@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { getDb } from "@/lib/db";
+import { DEFAULT_QUOTA_BYTES } from "@/lib/quota";
 import { resolveSessionUser } from "@/lib/userQuota";
 import { normalizeFolder } from "@/lib/validation";
 
@@ -27,7 +28,9 @@ export async function GET(request) {
 
     const query = { userId: user._id.toString() };
     if (folderParam && folderParam !== "all") {
-      query.folder = normalizeFolder(folderParam);
+      const normalizedFolder = normalizeFolder(folderParam);
+      query.folder =
+        normalizedFolder === "/" ? { $in: ["/", "root", "", null] } : normalizedFolder;
     }
     if (search) {
       query.originalName = { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" };
@@ -51,11 +54,11 @@ export async function GET(request) {
         size: file.size,
         key: file.key,
         publicUrl: file.publicUrl || null,
-        folder: file.folder || "root",
+        folder: !file.folder || file.folder === "root" ? "/" : file.folder,
         createdAt: file.createdAt,
       })),
       quota: {
-        limitBytes: user.quotaLimitBytes || 0,
+        limitBytes: user.quotaLimitBytes || DEFAULT_QUOTA_BYTES,
         usedBytes: user.storageUsedBytes || 0,
       },
     });

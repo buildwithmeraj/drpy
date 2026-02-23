@@ -3,7 +3,8 @@ import { getServerSession } from "next-auth";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { authOptions } from "@/auth";
 import { getDb } from "@/lib/db";
-import { getR2BucketName, getR2Client, getR2PublicBaseUrl } from "@/lib/r2";
+import { getR2UploadTarget, getTotalR2StorageLimitBytes } from "@/lib/r2";
+import { DEFAULT_QUOTA_BYTES } from "@/lib/quota";
 import { assertCsrf } from "@/lib/security";
 import { validateUploadPolicy } from "@/lib/uploadPolicy";
 import { resolveSessionUser } from "@/lib/userQuota";
@@ -40,8 +41,18 @@ export async function POST(request) {
       return Response.json({ error: "User not found." }, { status: 404 });
     }
 
-    const quotaLimitBytes = user.quotaLimitBytes || 0;
+    const quotaLimitBytes = user.quotaLimitBytes || DEFAULT_QUOTA_BYTES;
     const storageUsedBytes = user.storageUsedBytes || 0;
+    const globalStorageLimitBytes = getTotalR2StorageLimitBytes();
+    const globalUsageResult = await db.collection("files").aggregate([
+      {
+        $group: {
+          _id: null,
+          totalUsedBytes: { $sum: { $ifNull: ["$size", 0] } },
+        },
+      },
+    ]).toArray();
+    const globalUsedBytes = globalUsageResult[0]?.totalUsedBytes || 0;
 
     if (storageUsedBytes + file.size > quotaLimitBytes) {
       return Response.json(
@@ -49,15 +60,24 @@ export async function POST(request) {
         { status: 403 },
       );
     }
+    if (globalUsedBytes + file.size > globalStorageLimitBytes) {
+      return Response.json(
+        {
+          error:
+            "Not enough storage is available. Please contact the admin to add more storage.",
+        },
+        { status: 403 },
+      );
+    }
 
-    const bucketName = getR2BucketName();
+    const uploadTarget = getR2UploadTarget(user._id.toString());
+    const bucketName = uploadTarget.bucketName;
     const contentType = policy.mimeType;
     const safeName = safeFilename(file.name);
     const key = `${user._id.toString()}/${Date.now()}-${randomUUID()}-${safeName}`;
     const body = Buffer.from(await file.arrayBuffer());
 
-    const r2Client = getR2Client();
-    await r2Client.send(
+    await uploadTarget.client.send(
       new PutObjectCommand({
         Bucket: bucketName,
         Key: key,
@@ -68,7 +88,7 @@ export async function POST(request) {
     );
 
     const createdAt = new Date();
-    const publicBaseUrl = getR2PublicBaseUrl();
+    const publicBaseUrl = uploadTarget.publicBaseUrl;
     const publicUrl = publicBaseUrl ? `${publicBaseUrl.replace(/\/$/, "")}/${key}` : null;
 
     const insertResult = await db.collection("files").insertOne({
@@ -78,6 +98,7 @@ export async function POST(request) {
       size: file.size,
       key,
       bucket: bucketName,
+      r2AccountKey: uploadTarget.accountKey,
       publicUrl,
       folder,
       createdAt,
@@ -102,6 +123,7 @@ export async function POST(request) {
           size: file.size,
           key,
           publicUrl,
+          r2AccountKey: uploadTarget.accountKey,
           folder,
           createdAt,
         },

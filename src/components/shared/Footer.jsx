@@ -4,7 +4,8 @@ const Footer = () => {
   return (
     <footer className="pt-4 pb-20 lg:pb-4 px-[2%] bg-base-200 border-t border-base-300">
       <div className="text-center">
-        Copyright © 2025 WeCare. All rights reserved.
+        Copyright © 2025 {process.env.NEXT_PUBLIC_SITE_NAME}. All rights
+        reserved.
       </div>
     </footer>
   );

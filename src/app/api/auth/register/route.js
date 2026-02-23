@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { getDb } from "@/lib/db";
+import { DEFAULT_QUOTA_BYTES } from "@/lib/quota";
 import { assertCsrf } from "@/lib/security";
 
 function isValidEmail(email) {
@@ -53,7 +54,7 @@ export async function POST(request) {
       password: hashedPassword,
       image: null,
       emailVerified: null,
-      quotaLimitBytes: 5 * 1024 * 1024 * 1024,
+      quotaLimitBytes: DEFAULT_QUOTA_BYTES,
       storageUsedBytes: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
