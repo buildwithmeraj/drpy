@@ -1,14 +1,16 @@
+import { FiFileText } from "react-icons/fi";
+
 export const metadata = {
   title: "Terms of Service | DRPY",
 };
 
 export default function TosPage() {
   return (
-    <section className="max-w-4xl mx-auto py-10 space-y-6">
-      <h1>Terms of Service</h1>
+    <section className="page-shell max-w-4xl">
+      <h1 className="section-title"><FiFileText className="text-primary" /> Terms of Service</h1>
       <p className="text-sm opacity-70">Last updated: February 23, 2026</p>
 
-      <div className="space-y-4">
+      <div className="surface-card p-6 space-y-4 reveal">
         <p>
           By using DRPY, you agree to use the service lawfully and responsibly. You are solely
           responsible for content you upload and share.

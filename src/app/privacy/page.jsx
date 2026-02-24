@@ -1,14 +1,16 @@
+import { FiShield } from "react-icons/fi";
+
 export const metadata = {
   title: "Privacy Policy | DRPY",
 };
 
 export default function PrivacyPage() {
   return (
-    <section className="max-w-4xl mx-auto py-10 space-y-6">
-      <h1>Privacy Policy</h1>
+    <section className="page-shell max-w-4xl">
+      <h1 className="section-title"><FiShield className="text-primary" /> Privacy Policy</h1>
       <p className="text-sm opacity-70">Last updated: February 23, 2026</p>
 
-      <div className="space-y-4">
+      <div className="surface-card p-6 space-y-4 reveal">
         <p>
           We collect only the information needed to operate DRPY, including account identity,
           uploaded file metadata, share-link settings, and download analytics used for abuse

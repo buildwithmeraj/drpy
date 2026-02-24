@@ -174,7 +174,7 @@ export default function ShareDownloadClient({ code, initialMeta, initialError })
       </div>
 
       {previewUrl && (
-        <div className="card bg-base-100 border border-base-300 p-4">
+        <div className="surface-card p-4 reveal">
           <h4 className="font-semibold mb-3">Preview</h4>
           {previewMode === "image" && (
             /* eslint-disable-next-line @next/next/no-img-element */

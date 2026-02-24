@@ -5,7 +5,7 @@ export default function HomePricing() {
   return (
     <section className="space-y-3">
       <h2>Simple Starting Tier</h2>
-      <article className="card bg-base-200 p-7 border border-primary/20">
+      <article className="surface-card p-7 border-primary/30 reveal">
         <p className="text-sm uppercase tracking-wide opacity-70">Current Plan</p>
         <div className="flex items-end gap-2 mt-2">
           <p className="text-5xl font-black">Free</p>

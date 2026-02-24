@@ -27,7 +27,7 @@ export default function HomeHowItWorks() {
       <h2>How Drpy Works</h2>
       <div className="grid md:grid-cols-4 gap-3">
         {steps.map((item) => (
-          <article key={item.step} className="card bg-base-200 p-5">
+          <article key={item.step} className="surface-card p-5 reveal">
             <p className="text-sm font-semibold text-primary">{item.step}</p>
             <h3 className="text-xl font-bold mt-2">{item.title}</h3>
             <p className="text-sm opacity-80 mt-2">{item.text}</p>

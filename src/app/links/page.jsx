@@ -5,6 +5,7 @@ import { authOptions } from "@/auth";
 import { getDb } from "@/lib/db";
 import { isExpired } from "@/lib/shareLinks";
 import { resolveSessionUser } from "@/lib/userQuota";
+import { FiLink2 } from "react-icons/fi";
 import LinksManagerClient from "./LinksManagerClient";
 
 export const metadata = {
@@ -67,9 +68,9 @@ export default async function LinksPage() {
   }));
 
   return (
-    <section className="max-w-5xl mx-auto py-8">
+    <section className="page-shell max-w-5xl">
       <div className="flex items-center justify-between mb-4">
-        <h2>My Links</h2>
+        <h2 className="section-title"><FiLink2 className="text-primary" /> My Links</h2>
         <Link href="/files" className="btn btn-primary">
           Back to Files
         </Link>

@@ -1,6 +1,9 @@
 "use client";
 
+import ErrorMsg from "@/components/utilities/Error";
+import SuccessMsg from "@/components/utilities/Success";
 import { useState } from "react";
+import { FiMail } from "react-icons/fi";
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -44,69 +47,101 @@ export default function ContactPage() {
   };
 
   return (
-    <section className="max-w-3xl mx-auto py-10 space-y-6">
-      <h1>Contact</h1>
-      <p className="opacity-85">
-        Send us your questions, feedback, or policy requests.
-      </p>
+    <>
+      <div className="mb-12">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-3 bg-primary/10 rounded-lg">
+            <FiMail className="text-primary text-2xl" />
+          </div>
+          <h1 className="section-title m-0">Get in Touch</h1>
+        </div>
+        <p className="text-lg opacity-75 max-w-2xl">
+          Have a question or feedback? We&apos;d love to hear from you. Send us
+          a message and we&apos;ll respond as soon as possible.
+        </p>
+      </div>
 
-      <form className="card bg-base-200 border border-base-300 p-6 space-y-4" onSubmit={onSubmit}>
-        {error && <p className="alert alert-error py-2">{error}</p>}
-        {success && <p className="alert alert-success py-2">{success}</p>}
-
-        <label className="form-control">
-          <span className="label-text mb-1">Name</span>
+      <form
+        className="surface-card p-8 rounded-xl shadow-sm reveal space-y-6 max-w-2xl"
+        onSubmit={onSubmit}
+      >
+        {error && <ErrorMsg message={error} />}
+        {success && <SuccessMsg message={success} />}
+        <div className="form-control">
+          <label className="label-text font-semibold mb-2">Name *</label>
           <input
-            className="input input-bordered"
+            className="input input-bordered focus:input-primary transition-colors w-full"
+            placeholder="Your name"
             name="name"
             value={form.name}
             onChange={onChange}
             maxLength={120}
             required
           />
-        </label>
+        </div>
 
-        <label className="form-control">
-          <span className="label-text mb-1">Email</span>
+        <div className="form-control">
+          <label className="label-text font-semibold mb-2">Email *</label>
           <input
-            className="input input-bordered"
+            className="input input-bordered focus:input-primary transition-colors w-full"
             type="email"
+            placeholder="your@email.com"
             name="email"
             value={form.email}
             onChange={onChange}
             maxLength={180}
             required
           />
-        </label>
+        </div>
 
-        <label className="form-control">
-          <span className="label-text mb-1">Subject</span>
+        <div className="form-control">
+          <label className="label-text font-semibold mb-2">Subject *</label>
           <input
-            className="input input-bordered"
+            className="input input-bordered focus:input-primary transition-colors w-full"
+            placeholder="What is this about?"
             name="subject"
             value={form.subject}
             onChange={onChange}
             maxLength={180}
             required
           />
-        </label>
+        </div>
 
-        <label className="form-control">
-          <span className="label-text mb-1">Message</span>
+        <div className="form-control">
+          <label className="label-text font-semibold mb-2">
+            Message *{" "}
+            <span className="text-xs opacity-50 mt-1 text-right">
+              ({form.message.length}/5000)
+            </span>
+          </label>
           <textarea
-            className="textarea textarea-bordered min-h-36"
+            className="textarea textarea-bordered focus:textarea-primary transition-colors min-h-40 resize-none w-full"
+            placeholder="Tell us more about your inquiry..."
             name="message"
             value={form.message}
             onChange={onChange}
             maxLength={5000}
             required
           />
-        </label>
+        </div>
 
-        <button className="btn btn-primary" type="submit" disabled={submitting}>
-          {submitting ? "Sending..." : "Send Message"}
+        <button
+          className="btn btn-primary btn-lg w-full font-semibold"
+          type="submit"
+          disabled={submitting}
+        >
+          {submitting ? (
+            <>
+              <span className="loading loading-spinner loading-sm"></span>
+              Sending...
+            </>
+          ) : (
+            <>
+              <FiMail /> Send Message
+            </>
+          )}
         </button>
       </form>
-    </section>
+    </>
   );
 }

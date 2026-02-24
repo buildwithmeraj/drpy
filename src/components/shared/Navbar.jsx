@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { FiGrid, FiHome, FiLink2, FiLogIn, FiLogOut, FiMenu, FiUpload } from "react-icons/fi";
+import {
+  FiGrid,
+  FiHome,
+  FiInfo,
+  FiLink2,
+  FiLogIn,
+  FiLogOut,
+  FiMenu,
+  FiUpload,
+} from "react-icons/fi";
 import { signOut, useSession } from "next-auth/react";
 import Logo from "../utilities/Logo";
 import ThemeSwitcher from "../utilities/ThemeSwitcher";
@@ -64,9 +73,11 @@ export default function Navbar() {
             { href: "/upload", label: "Upload", icon: FiUpload },
             { href: "/files", label: "Files", icon: FiGrid },
             { href: "/links", label: "Links", icon: FiLink2 },
+            { href: "/about", label: "About", icon: FiInfo },
           ]
         : [
             { href: "/", label: "Home", icon: FiHome },
+            { href: "/about", label: "About", icon: FiInfo },
             { href: "/login", label: "Login", icon: FiLogIn },
             { href: "/signup", label: "Sign Up", icon: FiGrid },
           ],
@@ -104,53 +115,63 @@ export default function Navbar() {
             { href: "/", label: "Home", icon: FiHome },
             { href: "/login", label: "Login", icon: FiLogIn },
             { href: "/signup", label: "Sign Up", icon: FiGrid },
-            { href: "/upload", label: "Upload", icon: FiUpload },
-            { href: "/links", label: "Links", icon: FiLink2 },
+            { href: "/about", label: "About", icon: FiInfo },
+            { href: "/contact", label: "Contact", icon: FiLink2 },
           ],
     [isAuthenticated],
   );
 
   return (
     <>
-      <header className="flex items-center justify-between py-2 px-[2%] bg-base-200 fixed top-0 left-0 right-0 z-50 border-b border-base-300">
+      <header className="flex items-center justify-between py-2 px-[2%] bg-base-100/80 backdrop-blur fixed top-0 left-0 right-0 z-50 border-b border-base-300">
         <div className="flex items-center gap-2">
-          <button className="btn btn-ghost btn-circle md:hidden" onClick={() => setSidebarOpen(true)}>
+          <button
+            className="btn btn-ghost btn-circle md:hidden"
+            onClick={() => setSidebarOpen(true)}
+          >
             <FiMenu className="text-xl" />
           </button>
-          <Link href="/">
+          <Link
+            href="/"
+            className="group transition-transform duration-200 hover:scale-[1.02]"
+          >
             <Logo />
           </Link>
         </div>
 
         <div className="flex items-center gap-1">
-          <ThemeSwitcher />
-
-          {isAuthenticated && <ProfileDropdown session={session} />}
-
           <div className="hidden lg:flex items-center gap-2">
             {isAuthenticated ? (
               <>
                 <Link href="/upload" className="btn btn-sm btn-ghost">
-                  Upload
+                  <FiUpload /> Upload
                 </Link>
                 <Link href="/files" className="btn btn-sm btn-ghost">
-                  Files
+                  <FiGrid /> Files
                 </Link>
                 <Link href="/links" className="btn btn-sm btn-ghost">
-                  Links
+                  <FiLink2 /> Links
                 </Link>
+                <ProfileDropdown session={session} />
               </>
             ) : (
               <>
+                <Link href="/about" className="btn btn-sm btn-ghost">
+                  About
+                </Link>
                 <Link href="/login" className="btn btn-sm btn-ghost">
                   Login
                 </Link>
-                <Link href="/signup" className="btn btn-sm btn-primary">
+                <Link
+                  href="/signup"
+                  className="btn btn-sm btn-primary soft-glow"
+                >
                   Sign Up
                 </Link>
               </>
             )}
           </div>
+          <ThemeSwitcher />
         </div>
       </header>
 
@@ -161,10 +182,13 @@ export default function Navbar() {
             className="absolute inset-0 bg-black/35"
             onClick={() => setSidebarOpen(false)}
           />
-          <aside className="absolute right-0 top-0 h-full w-72 bg-base-100 border-l border-base-300 p-5 flex flex-col">
+          <aside className="absolute right-0 top-0 h-full w-72 bg-base-100 border-l border-base-300 p-5 flex flex-col reveal">
             <div className="flex items-center justify-between mb-5">
               <p className="font-semibold">Navigation</p>
-              <button className="btn btn-ghost btn-sm" onClick={() => setSidebarOpen(false)}>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => setSidebarOpen(false)}
+              >
                 Close
               </button>
             </div>
@@ -186,7 +210,11 @@ export default function Navbar() {
             <div className="mt-auto space-y-2 pt-4 border-t border-base-300">
               {isAuthenticated ? (
                 <>
-                  <Link href="/dashboard" className="btn btn-outline w-full" onClick={() => setSidebarOpen(false)}>
+                  <Link
+                    href="/dashboard"
+                    className="btn btn-outline w-full"
+                    onClick={() => setSidebarOpen(false)}
+                  >
                     Dashboard
                   </Link>
                   <button
@@ -201,7 +229,11 @@ export default function Navbar() {
                   </button>
                 </>
               ) : (
-                <Link href="/signup" className="btn btn-primary w-full" onClick={() => setSidebarOpen(false)}>
+                <Link
+                  href="/signup"
+                  className="btn btn-primary w-full"
+                  onClick={() => setSidebarOpen(false)}
+                >
                   Create Account
                 </Link>
               )}
@@ -210,13 +242,13 @@ export default function Navbar() {
         </div>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 z-[80] lg:hidden border-t border-base-300 bg-base-100">
+      <div className="fixed bottom-0 left-0 right-0 z-[80] lg:hidden border-t border-base-300 bg-base-100/90 backdrop-blur">
         <nav className="flex md:hidden items-stretch justify-around h-16">
           {dockLinksSmall.map((item) => (
             <Link
               key={item.href + item.label}
               href={item.href}
-              className="flex-1 flex flex-col items-center justify-center text-xs gap-1 hover:bg-base-200"
+              className="flex-1 flex flex-col items-center justify-center text-xs gap-1 hover:bg-base-200 transition-colors"
             >
               <item.icon className="text-base" />
               <span>{item.label}</span>
@@ -224,12 +256,12 @@ export default function Navbar() {
           ))}
         </nav>
 
-        <nav className="hidden md:flex lg:flex items-stretch justify-around h-16">
+        <nav className="hidden md:flex items-stretch justify-around h-16">
           {dockLinksMd.map((item) => (
             <Link
               key={item.href + item.label}
               href={item.href}
-              className="flex-1 flex flex-col items-center justify-center text-xs gap-1 hover:bg-base-200"
+              className="flex-1 flex flex-col items-center justify-center text-xs gap-1 hover:bg-base-200 transition-colors"
             >
               <item.icon className="text-base" />
               <span>{item.label}</span>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
+import { FiLogIn, FiMail, FiLock } from "react-icons/fi";
 
 const errorMessages = {
   AccessDenied: "Access denied. Please try again.",
@@ -63,20 +64,20 @@ export default function LoginPage() {
     : "";
 
   if (status === "loading" || status === "authenticated") {
-    return <section className="max-w-md mx-auto py-8">Loading...</section>;
+    return <section className="page-shell max-w-md">Loading...</section>;
   }
 
   return (
-    <section className="max-w-md mx-auto py-8">
-      <h2 className="text-center">Login</h2>
+    <section className="page-shell max-w-md">
+      <h2 className="section-title justify-center"><FiLogIn className="text-primary" /> Login</h2>
 
-      <form onSubmit={handleCredentialsLogin} className="card bg-base-200 p-6 gap-4">
+      <form onSubmit={handleCredentialsLogin} className="surface-card p-6 gap-4 reveal">
         {(error || queryErrorMessage) && (
-          <p className="text-error text-sm">{error || queryErrorMessage}</p>
+          <p className="alert alert-error text-sm">{error || queryErrorMessage}</p>
         )}
 
         <label className="form-control w-full">
-          <span className="label-text mb-1">Email</span>
+          <span className="label-text mb-1 inline-flex items-center gap-1"><FiMail /> Email</span>
           <input
             type="email"
             className="input input-bordered w-full"
@@ -87,7 +88,7 @@ export default function LoginPage() {
         </label>
 
         <label className="form-control w-full">
-          <span className="label-text mb-1">Password</span>
+          <span className="label-text mb-1 inline-flex items-center gap-1"><FiLock /> Password</span>
           <input
             type="password"
             className="input input-bordered w-full"
@@ -98,7 +99,7 @@ export default function LoginPage() {
           />
         </label>
 
-        <button type="submit" className="btn btn-primary w-full" disabled={isLoading}>
+        <button type="submit" className="btn btn-primary w-full soft-glow" disabled={isLoading}>
           {isLoading ? "Logging in..." : "Login"}
         </button>
 

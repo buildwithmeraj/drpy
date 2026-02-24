@@ -94,7 +94,7 @@ export default function LinksManagerClient({ initialLinks }) {
         const fullUrl = `${window.location.origin}${link.urlPath}`;
 
         return (
-          <div key={link.id} className="card bg-base-200 p-4">
+          <div key={link.id} className="surface-card p-4 reveal">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">

@@ -39,7 +39,7 @@ export default function HomeFeatures() {
       <h2>Everything Needed for Controlled Sharing</h2>
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3">
         {features.map((feature) => (
-          <article key={feature.title} className="card bg-base-200 p-5 border border-base-300">
+          <article key={feature.title} className="surface-card p-5 reveal">
             <feature.icon className="text-2xl text-primary mb-3" />
             <h3 className="font-semibold text-lg">{feature.title}</h3>
             <p className="text-sm opacity-80 mt-2">{feature.description}</p>

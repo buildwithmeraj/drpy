@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
+import { FiUserPlus, FiUser, FiMail, FiLock } from "react-icons/fi";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -62,18 +63,18 @@ export default function SignupPage() {
   };
 
   if (status === "loading" || status === "authenticated") {
-    return <section className="max-w-md mx-auto py-8">Loading...</section>;
+    return <section className="page-shell max-w-md">Loading...</section>;
   }
 
   return (
-    <section className="max-w-md mx-auto py-8">
-      <h2 className="text-center">Create Account</h2>
+    <section className="page-shell max-w-md">
+      <h2 className="section-title justify-center"><FiUserPlus className="text-primary" /> Create Account</h2>
 
-      <form onSubmit={handleSubmit} className="card bg-base-200 p-6 gap-4">
-        {error && <p className="text-error text-sm">{error}</p>}
+      <form onSubmit={handleSubmit} className="surface-card p-6 gap-4 reveal">
+        {error && <p className="alert alert-error text-sm">{error}</p>}
 
         <label className="form-control w-full">
-          <span className="label-text mb-1">Name</span>
+          <span className="label-text mb-1 inline-flex items-center gap-1"><FiUser /> Name</span>
           <input
             type="text"
             className="input input-bordered w-full"
@@ -84,7 +85,7 @@ export default function SignupPage() {
         </label>
 
         <label className="form-control w-full">
-          <span className="label-text mb-1">Email</span>
+          <span className="label-text mb-1 inline-flex items-center gap-1"><FiMail /> Email</span>
           <input
             type="email"
             className="input input-bordered w-full"
@@ -95,7 +96,7 @@ export default function SignupPage() {
         </label>
 
         <label className="form-control w-full">
-          <span className="label-text mb-1">Password</span>
+          <span className="label-text mb-1 inline-flex items-center gap-1"><FiLock /> Password</span>
           <input
             type="password"
             className="input input-bordered w-full"
@@ -106,7 +107,7 @@ export default function SignupPage() {
           />
         </label>
 
-        <button type="submit" className="btn btn-primary w-full" disabled={isLoading}>
+        <button type="submit" className="btn btn-primary w-full soft-glow" disabled={isLoading}>
           {isLoading ? "Creating account..." : "Sign up"}
         </button>
 

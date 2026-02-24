@@ -6,6 +6,7 @@ import { dateDaysAgo, formatBytes, formatDay } from "@/lib/analytics";
 import { getDb } from "@/lib/db";
 import { DEFAULT_QUOTA_BYTES } from "@/lib/quota";
 import { resolveSessionUser } from "@/lib/userQuota";
+import { FiBarChart2 } from "react-icons/fi";
 
 export const metadata = {
   title: "Dashboard | DRPY",
@@ -120,34 +121,34 @@ export default async function DashboardPage() {
     : 0;
 
   return (
-    <section className="max-w-5xl mx-auto py-8">
-      <h2>Dashboard</h2>
+    <section className="page-shell max-w-5xl">
+      <h2 className="section-title"><FiBarChart2 className="text-primary" /> Dashboard</h2>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
-        <div className="card bg-base-200 p-4">
+        <div className="surface-card reveal p-4">
           <p className="text-sm">Files</p>
           <p className="text-2xl font-bold">{fileCount}</p>
         </div>
-        <div className="card bg-base-200 p-4">
+        <div className="surface-card reveal p-4">
           <p className="text-sm">Active Links</p>
           <p className="text-2xl font-bold">{activeLinkCount}</p>
         </div>
-        <div className="card bg-base-200 p-4">
+        <div className="surface-card reveal p-4">
           <p className="text-sm">Total Downloads</p>
           <p className="text-2xl font-bold">{totalDownloads}</p>
         </div>
-        <div className="card bg-base-200 p-4">
+        <div className="surface-card reveal p-4">
           <p className="text-sm">Bandwidth (7d)</p>
           <p className="text-2xl font-bold">{formatBytes(totalBandwidthBytes)}</p>
         </div>
-        <div className="card bg-base-200 p-4">
+        <div className="surface-card reveal p-4">
           <p className="text-sm">Storage Used</p>
           <p className="text-2xl font-bold">{formatBytes(storageUsedBytes)}</p>
           <p className="text-xs opacity-75">of {formatBytes(storageLimitBytes)}</p>
         </div>
       </div>
 
-      <div className="card bg-base-200 p-5 mb-4">
+      <div className="surface-card reveal p-5 mb-4">
         <div className="flex justify-between text-sm mb-2">
           <span>Storage quota</span>
           <span>
@@ -157,7 +158,7 @@ export default async function DashboardPage() {
         <progress className="progress progress-primary w-full" value={storagePercent} max="100" />
       </div>
 
-      <div className="card bg-base-200 p-5 mb-4">
+      <div className="surface-card reveal p-5 mb-4">
         <h3 className="font-semibold mb-3">Downloads (Last 7 Days)</h3>
         <div className="space-y-2">
           {dailyDownloads.map((item) => (
@@ -175,7 +176,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div className="card bg-base-200 p-5 mb-4">
+      <div className="surface-card reveal p-5 mb-4">
         <h3 className="font-semibold mb-3">Bandwidth (Last 7 Days)</h3>
         <div className="space-y-2">
           {dailyBandwidth.map((item) => (
@@ -194,7 +195,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-4 mb-4">
-        <div className="card bg-base-200 p-5">
+        <div className="surface-card reveal p-5">
           <h3 className="font-semibold mb-3">Top Downloaded Links</h3>
           <div className="space-y-2 text-sm">
             {topLinks.length ? (
@@ -209,7 +210,7 @@ export default async function DashboardPage() {
             )}
           </div>
         </div>
-        <div className="card bg-base-200 p-5">
+        <div className="surface-card reveal p-5">
           <h3 className="font-semibold mb-3">Top Downloaded Files</h3>
           <div className="space-y-2 text-sm">
             {topFiles.length ? (
@@ -230,7 +231,7 @@ export default async function DashboardPage() {
         Expired links are cleaned up automatically. Files are retained by default unless orphan cleanup is enabled.
       </div>
 
-      <div className="card bg-base-200 p-6 gap-3">
+      <div className="surface-card reveal p-6 gap-3">
         <p>
           <span className="font-semibold">Name:</span> {session.user.name || "Not set"}
         </p>

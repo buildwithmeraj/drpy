@@ -5,6 +5,7 @@ import { authOptions } from "@/auth";
 import { getDb } from "@/lib/db";
 import { DEFAULT_QUOTA_BYTES } from "@/lib/quota";
 import { resolveSessionUser } from "@/lib/userQuota";
+import { FiFolder } from "react-icons/fi";
 import FilesManagerClient from "./FilesManagerClient";
 
 export const metadata = {
@@ -98,9 +99,9 @@ export default async function FilesPage() {
   };
 
   return (
-    <section className="max-w-6xl mx-auto py-8">
+    <section className="page-shell max-w-6xl">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h2>My Files</h2>
+        <h2 className="section-title"><FiFolder className="text-primary" /> My Files</h2>
         <div className="flex gap-2">
           <Link href="/links" className="btn btn-outline">
             My Links

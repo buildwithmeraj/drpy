@@ -23,7 +23,7 @@ export default function HomeFaq() {
       <h2>FAQ</h2>
       <div className="space-y-2">
         {faqs.map((item) => (
-          <details key={item.q} className="collapse collapse-plus bg-base-200 border border-base-300">
+          <details key={item.q} className="collapse collapse-plus surface-card reveal">
             <summary className="collapse-title font-semibold">{item.q}</summary>
             <div className="collapse-content text-sm opacity-80">{item.a}</div>
           </details>

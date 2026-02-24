@@ -11,7 +11,7 @@ export default function HomeStats() {
   return (
     <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
       {stats.map((stat) => (
-        <article key={stat.label} className="card bg-base-200 p-5">
+        <article key={stat.label} className="surface-card p-5 reveal">
           <p className="text-3xl font-black text-primary">{stat.value}</p>
           <p className="text-sm opacity-80 mt-1">{stat.label}</p>
         </article>

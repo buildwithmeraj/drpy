@@ -10,7 +10,7 @@ const geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata = {
   title: "DRPY",
-  description: "Your app description here",
+  description: "Temporary file sharing with privacy-first controls.",
 };
 
 export default function RootLayout({ children }) {
@@ -22,7 +22,7 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <ThemeProvider>
             <Navbar />
-            <main className="container mx-auto mt-18 px-4 mb-6 lg:mb-4 flex-1">
+            <main className="container mx-auto mt-18 px-4 mb-6 lg:mb-4 flex-1 reveal">
               {children}
             </main>
             <Footer />

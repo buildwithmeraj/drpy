@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function HomeCta() {
   return (
-    <section className="rounded-3xl bg-base-200 border border-base-300 p-8 md:p-10 text-center">
+    <section className="rounded-3xl surface-card p-8 md:p-10 text-center reveal">
       <h2 className="max-w-2xl mx-auto">Start Sharing Files Securely in Minutes</h2>
       <p className="max-w-2xl mx-auto text-sm opacity-80">
         Create your account and send temporary links with complete control over privacy,

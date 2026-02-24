@@ -1,7 +1,7 @@
 export default function HomeTrust() {
   return (
     <section className="grid lg:grid-cols-2 gap-4">
-      <article className="card bg-base-200 p-6 border border-base-300">
+      <article className="surface-card p-6 reveal">
         <h3 className="text-2xl font-bold">Security and Abuse Controls</h3>
         <ul className="mt-4 space-y-2 text-sm opacity-90">
           <li>Policy-based upload size and file-type validation.</li>
@@ -11,7 +11,7 @@ export default function HomeTrust() {
         </ul>
       </article>
 
-      <article className="card bg-base-200 p-6 border border-base-300">
+      <article className="surface-card p-6 reveal">
         <h3 className="text-2xl font-bold">Retention Policy</h3>
         <p className="mt-4 text-sm opacity-90">
           Expired and limit-reached links are cleaned automatically. Files are retained by default

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { FiFolder, FiUploadCloud } from "react-icons/fi";
 
 function formatBytes(bytes) {
   if (!bytes) return "0 B";
@@ -66,11 +67,11 @@ export default function UploadPage() {
   };
 
   return (
-    <section className="max-w-2xl mx-auto py-8">
-      <h2>Upload File</h2>
-      <form onSubmit={handleSubmit} className="card bg-base-200 p-6 gap-4">
-        {error && <p className="text-error text-sm">{error}</p>}
-        {success && <p className="text-success text-sm">{success}</p>}
+    <section className="page-shell max-w-2xl">
+      <h2 className="section-title"><FiUploadCloud className="text-primary" /> Upload File</h2>
+      <form onSubmit={handleSubmit} className="surface-card p-6 gap-4 reveal">
+        {error && <p className="alert alert-error text-sm">{error}</p>}
+        {success && <p className="alert alert-success text-sm">{success}</p>}
 
         <label className="form-control">
           <span className="label-text mb-2">Choose file (max 100MB)</span>
@@ -102,7 +103,7 @@ export default function UploadPage() {
         </label>
 
         <label className="form-control">
-          <span className="label-text mb-2">Folder</span>
+          <span className="label-text mb-2 inline-flex items-center gap-1"><FiFolder /> Folder</span>
           <input
             type="text"
             className="input input-bordered"
@@ -119,7 +120,7 @@ export default function UploadPage() {
           </p>
         )}
 
-        <button type="submit" className="btn btn-primary w-full" disabled={isUploading}>
+        <button type="submit" className="btn btn-primary w-full soft-glow" disabled={isUploading}>
           {isUploading ? "Uploading..." : "Upload"}
         </button>
 
