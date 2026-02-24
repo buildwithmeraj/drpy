@@ -15,6 +15,7 @@ import {
 import { signOut, useSession } from "next-auth/react";
 import Logo from "../utilities/Logo";
 import ThemeSwitcher from "../utilities/ThemeSwitcher";
+import { FaLink, FaFolder } from "react-icons/fa6";
 
 function AvatarButton({ session }) {
   const fallback = (session?.user?.name || session?.user?.email || "U")
@@ -144,13 +145,13 @@ export default function Navbar() {
             {isAuthenticated ? (
               <>
                 <Link href="/upload" className="btn btn-sm btn-ghost">
-                  <FiUpload /> Upload
+                  <FiUpload size={20} /> Upload
                 </Link>
                 <Link href="/files" className="btn btn-sm btn-ghost">
-                  <FiGrid /> Files
+                  <FaFolder /> Files
                 </Link>
                 <Link href="/links" className="btn btn-sm btn-ghost">
-                  <FiLink2 /> Links
+                  <FaLink size={20} /> Links
                 </Link>
                 <ProfileDropdown session={session} />
               </>

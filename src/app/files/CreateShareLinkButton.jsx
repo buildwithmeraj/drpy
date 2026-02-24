@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { FaCopy, FaGears, FaShareNodes } from "react-icons/fa6";
+import toast from "react-hot-toast";
 
 function toLocalDatetimeValue(date) {
   const pad = (n) => String(n).padStart(2, "0");
@@ -48,45 +50,50 @@ export default function CreateShareLinkButton({ fileId }) {
 
     const origin = window.location.origin;
     setShareLink(`${origin}${data.link.urlPath}`);
+    toast.success("Share link created successfully!");
   };
 
   const copyLink = async () => {
     if (!shareLink) return;
     await navigator.clipboard.writeText(shareLink);
+    toast.success("Share link copied to clipboard!");
   };
 
   const openModal = () => {
     if (!expiryDateTime) {
-      setExpiryDateTime(toLocalDatetimeValue(new Date(Date.now() + 24 * 60 * 60 * 1000)));
+      setExpiryDateTime(
+        toLocalDatetimeValue(new Date(Date.now() + 24 * 60 * 60 * 1000)),
+      );
     }
     setIsOpen(true);
   };
 
   return (
     <>
-      <button className="btn btn-sm btn-outline" onClick={openModal}>
+      <button className="btn btn-xs btn-info text-white" onClick={openModal}>
+        <FaShareNodes />
         Share
       </button>
 
       {isOpen && (
         <div className="fixed inset-0 bg-black/40 z-50 grid place-items-center p-4">
-          <div className="card bg-base-100 w-full max-w-md p-5 gap-3">
+          <div className="card bg-base-100 w-full max-w-md p-5 gap-3 text-left">
             <h3 className="font-semibold text-lg">Create Share Link</h3>
 
             {error && <p className="text-error text-sm">{error}</p>}
 
-            <label className="form-control">
-              <span className="label-text mb-1">Expiry date/time</span>
+            <div className="form-control">
+              <label className="label-text pb-1">Expiry date/time</label>
               <input
                 type="datetime-local"
                 className="input input-bordered w-full"
                 value={expiryDateTime}
                 onChange={(event) => setExpiryDateTime(event.target.value)}
               />
-            </label>
+            </div>
 
-            <label className="form-control">
-              <span className="label-text mb-1">Password (optional)</span>
+            <div className="form-control">
+              <label className="label-text mb-1">Password (optional)</label>
               <input
                 type="password"
                 className="input input-bordered w-full"
@@ -94,16 +101,20 @@ export default function CreateShareLinkButton({ fileId }) {
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="Leave blank for public link"
               />
-            </label>
+            </div>
 
             <label className="label cursor-pointer justify-start gap-2">
               <input
                 type="checkbox"
-                className="checkbox checkbox-sm"
+                className="checkbox checkbox-sm mb-1 mr-1"
                 checked={deleteAfterDownloads}
-                onChange={(event) => setDeleteAfterDownloads(event.target.checked)}
+                onChange={(event) =>
+                  setDeleteAfterDownloads(event.target.checked)
+                }
               />
-              <span className="label-text">Delete link after X downloads</span>
+              <span className="label-text">
+                Delete link after X times of downloads
+              </span>
             </label>
 
             {deleteAfterDownloads && (
@@ -128,15 +139,21 @@ export default function CreateShareLinkButton({ fileId }) {
             )}
 
             <div className="flex justify-end gap-2 mt-2">
-              <button className="btn btn-ghost" onClick={() => setIsOpen(false)}>
+              <button className="btn btn-soft" onClick={() => setIsOpen(false)}>
                 Close
               </button>
               {shareLink && (
-                <button className="btn btn-outline" onClick={copyLink}>
+                <button className="btn btn-info text-white" onClick={copyLink}>
+                  <FaCopy />
                   Copy
                 </button>
               )}
-              <button className="btn btn-primary" onClick={handleCreate} disabled={isSubmitting}>
+              <button
+                className="btn btn-primary"
+                onClick={handleCreate}
+                disabled={isSubmitting}
+              >
+                <FaGears />
                 {isSubmitting ? "Creating..." : "Create Link"}
               </button>
             </div>

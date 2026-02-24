@@ -6,7 +6,10 @@ import { dateDaysAgo, formatBytes, formatDay } from "@/lib/analytics";
 import { getDb } from "@/lib/db";
 import { DEFAULT_QUOTA_BYTES } from "@/lib/quota";
 import { resolveSessionUser } from "@/lib/userQuota";
-import { FiBarChart2 } from "react-icons/fi";
+import { FiBarChart2, FiUpload } from "react-icons/fi";
+import InfoMSg from "@/components/utilities/Info";
+import Image from "next/image";
+import { FaFolder, FaLink } from "react-icons/fa6";
 
 export const metadata = {
   title: "Dashboard | DRPY",
@@ -28,12 +31,17 @@ export default async function DashboardPage() {
 
   const userId = user._id.toString();
   const fileCount = await db.collection("files").countDocuments({ userId });
-  const activeLinkCount = await db.collection("links").countDocuments({ userId });
+  const activeLinkCount = await db
+    .collection("links")
+    .countDocuments({ userId });
   const links = await db
     .collection("links")
     .find({ userId }, { projection: { downloadCount: 1 } })
     .toArray();
-  const totalDownloads = links.reduce((sum, link) => sum + (link.downloadCount || 0), 0);
+  const totalDownloads = links.reduce(
+    (sum, link) => sum + (link.downloadCount || 0),
+    0,
+  );
   const topLinks = await db
     .collection("links")
     .aggregate([
@@ -44,7 +52,9 @@ export default async function DashboardPage() {
         $lookup: {
           from: "files",
           let: { fileObjectId: { $toObjectId: "$fileId" } },
-          pipeline: [{ $match: { $expr: { $eq: ["$_id", "$$fileObjectId"] } } }],
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$fileObjectId"] } } },
+          ],
           as: "file",
         },
       },
@@ -67,7 +77,9 @@ export default async function DashboardPage() {
         $lookup: {
           from: "files",
           let: { fileObjectId: { $toObjectId: "$_id" } },
-          pipeline: [{ $match: { $expr: { $eq: ["$_id", "$$fileObjectId"] } } }],
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$fileObjectId"] } } },
+          ],
           as: "file",
         },
       },
@@ -100,7 +112,9 @@ export default async function DashboardPage() {
     .toArray();
 
   const countMap = new Map(analyticsRows.map((row) => [row._id, row.count]));
-  const bytesMap = new Map(analyticsRows.map((row) => [row._id, row.bytes || 0]));
+  const bytesMap = new Map(
+    analyticsRows.map((row) => [row._id, row.bytes || 0]),
+  );
   const dailyDownloads = [];
   const dailyBandwidth = [];
   let totalBandwidthBytes = 0;
@@ -121,10 +135,49 @@ export default async function DashboardPage() {
     : 0;
 
   return (
-    <section className="page-shell max-w-5xl">
-      <h2 className="section-title"><FiBarChart2 className="text-primary" /> Dashboard</h2>
-
-      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
+    <section className="space-y-6">
+      <h2 className="text-3xl">
+        <FiBarChart2 className="text-primary inline mb-1" /> Dashboard
+      </h2>
+      <div className="surface-card reveal p-6 gap-3">
+        <div className="flex items-center gap-4">
+          <Image
+            src={session.user.image || "/default-avatar.png"}
+            alt="User Avatar"
+            width={70}
+            height={70}
+            className="rounded-full"
+          />{" "}
+          <div>
+            <p>
+              <span className="font-semibold">Name:</span>{" "}
+              {session.user.name || "Not set"}
+            </p>
+            <p>
+              <span className="font-semibold">Email:</span> {session.user.email}
+            </p>
+            <p>
+              <span className="font-semibold">User ID:</span>{" "}
+              {session.user.id || "N/A"}
+            </p>
+          </div>
+        </div>
+        <div className="pt-2 flex gap-2 flex-wrap">
+          <Link href="/files" className="btn btn-primary">
+            <FaFolder />
+            My Files
+          </Link>
+          <Link href="/links" className="btn btn-primary">
+            <FaLink size={20} />
+            My Links
+          </Link>
+          <Link href="/upload" className="btn btn-secondary">
+            <FiUpload size={20} />
+            Upload Files
+          </Link>
+        </div>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
         <div className="surface-card reveal p-4">
           <p className="text-sm">Files</p>
           <p className="text-2xl font-bold">{fileCount}</p>
@@ -139,70 +192,44 @@ export default async function DashboardPage() {
         </div>
         <div className="surface-card reveal p-4">
           <p className="text-sm">Bandwidth (7d)</p>
-          <p className="text-2xl font-bold">{formatBytes(totalBandwidthBytes)}</p>
+          <p className="text-2xl font-bold">
+            {formatBytes(totalBandwidthBytes)}
+          </p>
         </div>
         <div className="surface-card reveal p-4">
           <p className="text-sm">Storage Used</p>
           <p className="text-2xl font-bold">{formatBytes(storageUsedBytes)}</p>
-          <p className="text-xs opacity-75">of {formatBytes(storageLimitBytes)}</p>
+          <p className="text-xs opacity-75">
+            of {formatBytes(storageLimitBytes)}
+          </p>
         </div>
       </div>
-
-      <div className="surface-card reveal p-5 mb-4">
-        <div className="flex justify-between text-sm mb-2">
-          <span>Storage quota</span>
-          <span>
-            {formatBytes(storageUsedBytes)} / {formatBytes(storageLimitBytes)}
-          </span>
+      <div className="grid lg:grid-cols-3 gap-4">
+        <div className="surface-card reveal p-5">
+          <div className="flex justify-between font-semibold mb-3">
+            <span>Storage quota</span>
+            <span>
+              {formatBytes(storageUsedBytes)} / {formatBytes(storageLimitBytes)}
+            </span>
+          </div>
+          <progress
+            className="progress progress-primary w-full space-y-2 "
+            value={storagePercent}
+            max="100"
+          />
         </div>
-        <progress className="progress progress-primary w-full" value={storagePercent} max="100" />
-      </div>
-
-      <div className="surface-card reveal p-5 mb-4">
-        <h3 className="font-semibold mb-3">Downloads (Last 7 Days)</h3>
-        <div className="space-y-2">
-          {dailyDownloads.map((item) => (
-            <div key={item.day} className="grid grid-cols-[90px_1fr_50px] gap-3 items-center">
-              <span className="text-xs opacity-75">{item.day.slice(5)}</span>
-              <div className="w-full bg-base-300 rounded-full h-2 overflow-hidden">
-                <div
-                  className="h-2 bg-primary rounded-full"
-                  style={{ width: `${(item.count / maxDayCount) * 100}%` }}
-                />
-              </div>
-              <span className="text-sm text-right">{item.count}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="surface-card reveal p-5 mb-4">
-        <h3 className="font-semibold mb-3">Bandwidth (Last 7 Days)</h3>
-        <div className="space-y-2">
-          {dailyBandwidth.map((item) => (
-            <div key={item.day} className="grid grid-cols-[90px_1fr_90px] gap-3 items-center">
-              <span className="text-xs opacity-75">{item.day.slice(5)}</span>
-              <div className="w-full bg-base-300 rounded-full h-2 overflow-hidden">
-                <div
-                  className="h-2 bg-accent rounded-full"
-                  style={{ width: `${(item.bytes / maxBandwidth) * 100}%` }}
-                />
-              </div>
-              <span className="text-sm text-right">{formatBytes(item.bytes)}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-4 mb-4">
         <div className="surface-card reveal p-5">
           <h3 className="font-semibold mb-3">Top Downloaded Links</h3>
           <div className="space-y-2 text-sm">
             {topLinks.length ? (
               topLinks.map((row) => (
                 <p key={row.code} className="flex justify-between gap-3">
-                  <span className="truncate">{row.file?.originalName || "Unknown file"}</span>
-                  <span className="font-semibold">{row.downloadCount || 0}</span>
+                  <span className="truncate">
+                    {row.file?.originalName || "Unknown file"}
+                  </span>
+                  <span className="font-semibold">
+                    {row.downloadCount || 0}
+                  </span>
                 </p>
               ))
             ) : (
@@ -216,8 +243,12 @@ export default async function DashboardPage() {
             {topFiles.length ? (
               topFiles.map((row) => (
                 <p key={row._id} className="flex justify-between gap-3">
-                  <span className="truncate">{row.file?.originalName || "Unknown file"}</span>
-                  <span className="font-semibold">{row.downloadCount || 0}</span>
+                  <span className="truncate">
+                    {row.file?.originalName || "Unknown file"}
+                  </span>
+                  <span className="font-semibold">
+                    {row.downloadCount || 0}
+                  </span>
                 </p>
               ))
             ) : (
@@ -227,27 +258,49 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div className="alert alert-info mb-4">
-        Expired links are cleaned up automatically. Files are retained by default unless orphan cleanup is enabled.
+      <InfoMSg message="Expired links are cleaned up automatically. Files are retained by default unless orphan cleanup is enabled." />
+
+      <div className="surface-card reveal p-5">
+        <h3 className="font-semibold mb-3">Downloads (Last 7 Days)</h3>
+        <div className="space-y-2">
+          {dailyDownloads.map((item) => (
+            <div
+              key={item.day}
+              className="grid grid-cols-[90px_1fr_50px] gap-3 items-center"
+            >
+              <span className="text-xs opacity-75">{item.day.slice(5)}</span>
+              <div className="w-full bg-base-300 rounded-full h-2 overflow-hidden">
+                <div
+                  className="h-2 bg-primary rounded-full"
+                  style={{ width: `${(item.count / maxDayCount) * 100}%` }}
+                />
+              </div>
+              <span className="text-sm text-right">{item.count}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="surface-card reveal p-6 gap-3">
-        <p>
-          <span className="font-semibold">Name:</span> {session.user.name || "Not set"}
-        </p>
-        <p>
-          <span className="font-semibold">Email:</span> {session.user.email}
-        </p>
-        <p>
-          <span className="font-semibold">User ID:</span> {session.user.id || "N/A"}
-        </p>
-        <div className="pt-2 flex gap-2 flex-wrap">
-          <Link href="/" className="btn btn-primary">
-            Home
-          </Link>
-          <Link href="/files" className="btn btn-outline">
-            My Files
-          </Link>
+      <div className="surface-card reveal p-5">
+        <h3 className="font-semibold mb-3">Bandwidth (Last 7 Days)</h3>
+        <div className="space-y-2">
+          {dailyBandwidth.map((item) => (
+            <div
+              key={item.day}
+              className="grid grid-cols-[90px_1fr_90px] gap-3 items-center"
+            >
+              <span className="text-xs opacity-75">{item.day.slice(5)}</span>
+              <div className="w-full bg-base-300 rounded-full h-2 overflow-hidden">
+                <div
+                  className="h-2 bg-accent rounded-full"
+                  style={{ width: `${(item.bytes / maxBandwidth) * 100}%` }}
+                />
+              </div>
+              <span className="text-sm text-right">
+                {formatBytes(item.bytes)}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </section>

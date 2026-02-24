@@ -5,8 +5,9 @@ import { authOptions } from "@/auth";
 import { getDb } from "@/lib/db";
 import { DEFAULT_QUOTA_BYTES } from "@/lib/quota";
 import { resolveSessionUser } from "@/lib/userQuota";
-import { FiFolder } from "react-icons/fi";
+import { FiFolder, FiUpload } from "react-icons/fi";
 import FilesManagerClient from "./FilesManagerClient";
+import { FaLink } from "react-icons/fa6";
 
 export const metadata = {
   title: "My Files | DRPY",
@@ -99,20 +100,29 @@ export default async function FilesPage() {
   };
 
   return (
-    <section className="page-shell max-w-6xl">
+    <section className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h2 className="section-title"><FiFolder className="text-primary" /> My Files</h2>
+        <h2 className="section-title">
+          <FiFolder className="text-primary" size={24} /> My Files
+        </h2>
         <div className="flex gap-2">
           <Link href="/links" className="btn btn-outline">
-            My Links
+            {" "}
+            <FaLink size={20} />
+            Links
           </Link>
           <Link href="/upload" className="btn btn-primary">
-            Upload New File
+            <FiUpload size={20} />
+            Upload File
           </Link>
         </div>
       </div>
 
-      <FilesManagerClient initialFiles={initialFiles} initialFolders={initialFolders} quota={quota} />
+      <FilesManagerClient
+        initialFiles={initialFiles}
+        initialFolders={initialFolders}
+        quota={quota}
+      />
     </section>
   );
 }

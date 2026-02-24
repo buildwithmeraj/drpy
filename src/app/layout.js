@@ -4,13 +4,14 @@ import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
 import ThemeProvider from "@/providers/ThemeProvider";
 import AuthProvider from "@/providers/AuthProvider";
+import { Toaster } from "react-hot-toast";
 
 const geist = Geist({ subsets: ["latin"] });
 const geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata = {
   title: "DRPY",
-  description: "Temporary file sharing with privacy-first controls.",
+  description: "Your app description here",
 };
 
 export default function RootLayout({ children }) {
@@ -22,9 +23,10 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <ThemeProvider>
             <Navbar />
-            <main className="container mx-auto mt-18 px-4 mb-6 lg:mb-4 flex-1 reveal">
+            <main className="container mx-auto mt-18 px-4 mb-6 lg:mb-4 flex-1">
               {children}
             </main>
+            <Toaster position="top-right" reverseOrder={false} />
             <Footer />
           </ThemeProvider>
         </AuthProvider>

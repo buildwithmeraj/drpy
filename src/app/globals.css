@@ -71,11 +71,6 @@
   --noise: 0;
 }
 
-html,
-body {
-  min-height: 100%;
-}
-
 body {
   background:
     radial-gradient(
