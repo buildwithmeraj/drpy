@@ -13,6 +13,7 @@ import {
   FiEyeOff,
 } from "react-icons/fi";
 import { FaGoogle } from "react-icons/fa6";
+import ErrorMsg from "@/components/utilities/Error";
 
 function validateEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -140,23 +141,8 @@ export default function SignupPage() {
               </h2>
             </div>
           </div>
-          {error && (
-            <div className="alert alert-error py-3 px-4">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="stroke-current shrink-0 h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M10 14l-2-2m0 0l-2-2m2 2l2-2m0 0l2 2M19 12a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-              <span className="text-sm">{error}</span>
-            </div>
+          {(error || queryErrorMessage) && (
+            <ErrorMsg message={error || queryErrorMessage} />
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">

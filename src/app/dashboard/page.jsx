@@ -204,8 +204,8 @@ export default async function DashboardPage() {
           </p>
         </div>
       </div>
-      <div className="grid lg:grid-cols-3 gap-4">
-        <div className="surface-card reveal p-5">
+      <div className="grid lg:grid-cols-2 gap-4">
+        <div className="surface-card reveal p-5 col-span-full">
           <div className="flex justify-between font-semibold mb-3">
             <span>Storage quota</span>
             <span>

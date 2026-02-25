@@ -15,16 +15,21 @@ export default async function SharePage({ params }) {
   const initialError = result.status === 200 ? "" : result.error;
 
   return (
-    <section className="page-shell max-w-3xl">
-      <div className="mb-4">
-        <h2 className="section-title"><FiDownloadCloud className="text-primary" /> Shared File</h2>
-        <p className="opacity-70">Secure temporary access powered by DRPY</p>
+    <section className="flex flex-col items-center justify-center min-h-[80dvh] px-2">
+      <div className="w-full max-w-2xl">
+        <div className="flex items-center gap-2 mb-2">
+          <FiDownloadCloud className="text-primary text-2xl" />
+          <h2 className="text-2xl font-bold section-title">Shared File</h2>
+        </div>
+        <p className="opacity-70 mb-4">
+          Secure temporary access powered by DRPY
+        </p>
+        <ShareDownloadClient
+          code={code}
+          initialMeta={initialMeta}
+          initialError={initialError}
+        />
       </div>
-      <ShareDownloadClient
-        code={code}
-        initialMeta={initialMeta}
-        initialError={initialError}
-      />
     </section>
   );
 }

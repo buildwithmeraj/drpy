@@ -7,6 +7,7 @@ import { signIn, useSession } from "next-auth/react";
 import { FiLogIn, FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { FaGoogle } from "react-icons/fa6";
 import { FaSignInAlt } from "react-icons/fa";
+import ErrorMsg from "@/components/utilities/Error";
 
 const errorMessages = {
   AccessDenied: "Access denied. Please try again.",
@@ -115,24 +116,8 @@ export default function LoginPage() {
             </div>
           </div>
           {(error || queryErrorMessage) && (
-            <div className="alert alert-error py-3 px-4">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="stroke-current shrink-0 h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M10 14l-2-2m0 0l-2-2m2 2l2-2m0 0l2 2M19 12a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-              <span className="text-sm">{error || queryErrorMessage}</span>
-            </div>
+            <ErrorMsg message={error || queryErrorMessage} />
           )}
-
           <form onSubmit={handleCredentialsLogin} className="space-y-4">
             <div className="flex flex-col gap-1.5">
               <span className="label-text font-semibold inline-flex items-center gap-2 text-base-content">

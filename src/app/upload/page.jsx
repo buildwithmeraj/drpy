@@ -1,8 +1,18 @@
 "use client";
 
+import ErrorMsg from "@/components/utilities/Error";
+import SuccessMsg from "@/components/utilities/Success";
 import Link from "next/link";
 import { useState } from "react";
-import { FiFolder, FiUploadCloud } from "react-icons/fi";
+import { FaUndoAlt } from "react-icons/fa";
+import { FaFolder } from "react-icons/fa6";
+import {
+  FiUploadCloud,
+  FiFile,
+  FiCheckCircle,
+  FiXCircle,
+  FiUpload,
+} from "react-icons/fi";
 
 function formatBytes(bytes) {
   if (!bytes) return "0 B";
@@ -14,7 +24,6 @@ function formatBytes(bytes) {
 
 export default function UploadPage() {
   const [file, setFile] = useState(null);
-  const [folder, setFolder] = useState("/");
   const [isUploading, setIsUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState("");
@@ -45,7 +54,6 @@ export default function UploadPage() {
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("folder", folder);
 
     setIsUploading(true);
 
@@ -67,67 +75,107 @@ export default function UploadPage() {
   };
 
   return (
-    <section className="page-shell max-w-2xl">
-      <h2 className="section-title"><FiUploadCloud className="text-primary" /> Upload File</h2>
-      <form onSubmit={handleSubmit} className="surface-card p-6 gap-4 reveal">
-        {error && <p className="alert alert-error text-sm">{error}</p>}
-        {success && <p className="alert alert-success text-sm">{success}</p>}
-
-        <label className="form-control">
-          <span className="label-text mb-2">Choose file (max 100MB)</span>
-          <div
-            className={`border-2 border-dashed rounded-2xl p-6 text-center transition ${
-              dragging ? "border-primary bg-base-100" : "border-base-300 bg-base-100/60"
-            }`}
-            onDragOver={(event) => {
-              event.preventDefault();
-              setDragging(true);
-            }}
-            onDragLeave={(event) => {
-              event.preventDefault();
-              setDragging(false);
-            }}
-            onDrop={handleDrop}
-          >
-            <p className="font-medium mb-2">Drag and drop file here</p>
-            <p className="text-sm opacity-70 mb-4">or choose from your device</p>
-            <input
-              type="file"
-              className="file-input file-input-bordered w-full"
-              onChange={(event) => {
-                const selectedFile = event.target.files?.[0] || null;
-                applySelectedFile(selectedFile);
-              }}
-            />
+    <section className="flex flex-col items-center justify-center min-h-[80dvh] px-2">
+      <div className="w-full max-w-lg">
+        <div className="bg-base-100 rounded-2xl border border-base-300 shadow-sm p-7 flex flex-col gap-6">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2 mb-2">
+              <FiUpload className="text-primary text-2xl" size={30} />
+              <h2 className="text-2xl font-bold">Upload File</h2>
+            </div>
+            <Link href="/files" className="btn btn-info btn-soft">
+              <FaFolder />
+              My Files
+            </Link>
           </div>
-        </label>
-
-        <label className="form-control">
-          <span className="label-text mb-2 inline-flex items-center gap-1"><FiFolder /> Folder</span>
-          <input
-            type="text"
-            className="input input-bordered"
-            value={folder}
-            onChange={(event) => setFolder(event.target.value)}
-            placeholder="/"
-          />
-        </label>
-
-        {file && (
-          <p className="text-sm">
-            Selected: <span className="font-semibold">{file.name}</span> (
-            {formatBytes(file.size)})
+          <p className="opacity-70 mb-2">
+            Upload a file to your cloud storage. Max size{" "}
+            {process.env.NEXT_PUBLIC_MAX_FILE_SIZE_MB || 100}MB.
           </p>
-        )}
 
-        <button type="submit" className="btn btn-primary w-full soft-glow" disabled={isUploading}>
-          {isUploading ? "Uploading..." : "Upload"}
-        </button>
+          {error && (
+            <ErrorMsg
+              message={error}
+              icon={<FiXCircle className="w-5 h-5" />}
+            />
+          )}
+          {success && <SuccessMsg message={success} />}
 
-        <Link href="/files" className="btn btn-outline w-full">
-          Go to My Files
-        </Link>
-      </form>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            <label className="flex flex-col gap-2">
+              <div className="font-semibold text-base-content pb-2">
+                Choose file
+              </div>
+              <div
+                className={`border-2 border-dashed rounded-2xl p-6 text-center transition cursor-pointer select-none ${
+                  dragging
+                    ? "border-primary bg-base-100"
+                    : "border-base-300 bg-base-100/60"
+                }`}
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  setDragging(true);
+                }}
+                onDragLeave={(event) => {
+                  event.preventDefault();
+                  setDragging(false);
+                }}
+                onDrop={handleDrop}
+                onClick={(event) => {
+                  if (event.target === event.currentTarget) {
+                    document.getElementById("file-input").click();
+                  }
+                }}
+              >
+                <p className="font-medium mb-2">
+                  Drag and drop file here or click to select
+                </p>
+                <p className="text-sm opacity-70 mb-4">Max 100MB</p>
+                <input
+                  id="file-input"
+                  type="file"
+                  className="hidden"
+                  onChange={(event) => {
+                    const selectedFile = event.target.files?.[0] || null;
+                    applySelectedFile(selectedFile);
+                  }}
+                />
+                {file && (
+                  <>
+                    <div className="divider"></div>
+                    <div className="font-semibold text-base-content flex items-center gap-1 mb-1">
+                      <FiFile className="text-primary" size={24} />
+                      <span className="truncate">{file.name}</span>
+                    </div>
+                    <div className="text-sm opacity-80">
+                      ({formatBytes(file.size)})
+                    </div>
+                  </>
+                )}
+              </div>
+            </label>
+            <div className="flex items-center gap-2">
+              <button
+                type="reset"
+                className="btn btn-soft"
+                onClick={() => applySelectedFile(null)}
+                disabled={isUploading}
+              >
+                <FaUndoAlt />
+                Reset
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary flex-1 font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isUploading}
+              >
+                <FiUpload size={18} />
+                {isUploading ? "Uploading..." : "Upload"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </section>
   );
 }
