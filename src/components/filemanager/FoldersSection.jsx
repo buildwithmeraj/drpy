@@ -1,5 +1,7 @@
 "use client";
 
+import { FaFolderPlus } from "react-icons/fa6";
+
 export default function FoldersSection({
   folderRows,
   onOpenFolder,
@@ -12,6 +14,7 @@ export default function FoldersSection({
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-lg font-semibold">Folders</h3>
         <button className="btn btn-sm btn-primary" onClick={onAddFolder}>
+          <FaFolderPlus />
           Add Folder
         </button>
       </div>
@@ -32,15 +35,24 @@ export default function FoldersSection({
                 <td>{folder.fileCount}</td>
                 <td className="text-right">
                   <div className="flex justify-end gap-2">
-                    <button className="btn btn-xs btn-primary" onClick={() => onOpenFolder(folder.name)}>
+                    <button
+                      className="btn btn-xs btn-primary"
+                      onClick={() => onOpenFolder(folder.name)}
+                    >
                       Open
                     </button>
                     {!folder.isRoot && (
                       <>
-                        <button className="btn btn-xs btn-info text-white" onClick={() => onRenameFolder(folder)}>
+                        <button
+                          className="btn btn-xs btn-info text-white"
+                          onClick={() => onRenameFolder(folder)}
+                        >
                           Rename
                         </button>
-                        <button className="btn btn-xs btn-error text-white" onClick={() => onDeleteFolder(folder)}>
+                        <button
+                          className="btn btn-xs btn-error text-white"
+                          onClick={() => onDeleteFolder(folder)}
+                        >
                           Delete
                         </button>
                       </>

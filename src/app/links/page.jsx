@@ -5,8 +5,9 @@ import { authOptions } from "@/auth";
 import { getDb } from "@/lib/db";
 import { isExpired } from "@/lib/shareLinks";
 import { resolveSessionUser } from "@/lib/userQuota";
-import { FiLink2 } from "react-icons/fi";
 import LinksManagerClient from "./LinksManagerClient";
+import { FaLink } from "react-icons/fa6";
+import { FaArrowAltCircleLeft } from "react-icons/fa";
 
 export const metadata = {
   title: "My Links | DRPY",
@@ -44,7 +45,9 @@ export default async function LinksPage() {
         $lookup: {
           from: "files",
           let: { fileObjectId: { $toObjectId: "$fileId" } },
-          pipeline: [{ $match: { $expr: { $eq: ["$_id", "$$fileObjectId"] } } }],
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$fileObjectId"] } } },
+          ],
           as: "file",
         },
       },
@@ -68,10 +71,13 @@ export default async function LinksPage() {
   }));
 
   return (
-    <section className="page-shell max-w-5xl">
+    <section className="">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="section-title"><FiLink2 className="text-primary" /> My Links</h2>
+        <h2 className="section-title">
+          <FaLink className="text-primary" /> My Links
+        </h2>
         <Link href="/files" className="btn btn-primary">
+          <FaArrowAltCircleLeft />
           Back to Files
         </Link>
       </div>

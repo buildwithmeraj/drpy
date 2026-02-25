@@ -1,0 +1,170 @@
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import toast from "react-hot-toast";
+import { FaCopy, FaGears, FaClock, FaDownload, FaLock } from "react-icons/fa6";
+import { MdDelete } from "react-icons/md";
+import BrandedQrCode from "@/components/utilities/BrandedQrCode";
+import { statusBadge } from "../../app/links/utils";
+import { useCallback } from "react";
+
+export default function LinkCard({
+  link,
+  onExtend,
+  onRegenerate,
+  onRevoke,
+  loadingId,
+}) {
+  const expired = link.status === "expired";
+  const limitReached = link.status === "limit_reached";
+  const canExtendDownloads = typeof link.maxDownloads === "number";
+  const badge = statusBadge(link.status);
+
+  const getFullUrl = useCallback(() => {
+    if (typeof window === "undefined") return "";
+    return `${window.location.origin}${link.urlPath}`;
+  }, [link.urlPath]);
+
+  const copy = async () => {
+    const fullUrl = getFullUrl();
+    if (!fullUrl) return;
+    await navigator.clipboard.writeText(fullUrl);
+    toast.success("Link copied to clipboard!");
+  };
+
+  return (
+    <div
+      className={`bg-base-100 rounded-2xl border border-base-300 shadow-sm p-5 flex flex-col gap-3 transition-opacity ${expired ? "opacity-60" : ""}`}
+    >
+      <div className="flex flex-col gap-1.5">
+        <span className="font-bold text-base-content text-base truncate">
+          {link.fileName}
+        </span>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span
+            className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full ${badge.classes}`}
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full inline-block ${badge.dot}`}
+            />
+            {badge.label}
+          </span>
+          {link.hasPassword && (
+            <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full bg-base-200 border border-warning text-warning">
+              <FaLock className="text-[10px]" /> Protected
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="bg-base-200 border border-base-300 rounded-xl p-2 flex flex-col gap-1.5">
+        <div className="flex items-center gap-2">
+          <div className="flex flex-col">
+            <span className="text-sm text-base-content/60 font-medium">
+              Share URL
+            </span>
+            <div className="flex items-center">
+              <Link
+                href={link.urlPath}
+                target="_blank"
+                rel="noreferrer"
+                className="text-primary text-sm truncate flex-1 hover:underline"
+              >
+                <Image
+                  src="/icon.svg"
+                  width={16}
+                  height={16}
+                  alt="Link icon"
+                  className="mr-1 inline-block"
+                />
+                {link.urlPath}
+              </Link>
+              <button
+                onClick={copy}
+                className="shrink-0 p-1.5 text-blue-500 cursor-pointer btn btn-circle btn-soft btn-sm rounded-full ml-2"
+                title="Copy link"
+              >
+                <FaCopy size={14} />
+              </button>
+            </div>
+          </div>
+          <div className="flex justify-end flex-1">
+            <BrandedQrCode value={getFullUrl()} size={70} />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="flex items-center gap-2 text-sm text-base-content">
+          <FaDownload className="opacity-60 shrink-0 mb-1" size={24} />
+          <div>
+            <div className="text-xs text-base-content/50 font-medium leading-none mb-0.5">
+              Downloads
+            </div>
+            <div className="font-semibold">
+              {link.downloadCount}
+              {typeof link.maxDownloads === "number" && (
+                <span className="text-base-content/40 font-normal">
+                  {" "}
+                  / {link.maxDownloads}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-base-content justify-self-end">
+          <FaClock className="opacity-60 shrink-0" size={24} />
+          <div>
+            <div className="text-xs text-base-content/50 font-medium leading-none mb-0.5">
+              Expires
+            </div>
+            <div className="font-semibold">
+              {new Date(link.expiresAt).toLocaleDateString("en-US", {
+                month: "numeric",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex gap-2 pt-1 justify-between">
+        <button
+          className="btn btn-primary text-white disabled:cursor-not-allowed flex-1"
+          onClick={() =>
+            onExtend(
+              link,
+              canExtendDownloads && limitReached ? "downloads" : "hours",
+            )
+          }
+          disabled={loadingId === link.id || expired}
+        >
+          {canExtendDownloads && limitReached ? (
+            <FaDownload className="text-xs" />
+          ) : (
+            <FaClock size={14} />
+          )}
+          Extend
+        </button>
+        <button
+          className="btn btn-info text-white disabled:cursor-not-allowed flex-1"
+          onClick={() => onRegenerate(link.id)}
+          disabled={loadingId === link.id || expired}
+        >
+          <FaGears size={18} />
+          Regenerate
+        </button>
+        <button
+          className="btn btn-error text-white disabled:cursor-not-allowed flex-1"
+          onClick={() => onRevoke(link.id)}
+          disabled={loadingId === link.id}
+        >
+          <MdDelete size={18} />
+          Revoke
+        </button>
+      </div>
+    </div>
+  );
+}

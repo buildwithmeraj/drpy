@@ -69,15 +69,24 @@ export default function LoginPage() {
 
   return (
     <section className="page-shell max-w-md">
-      <h2 className="section-title justify-center"><FiLogIn className="text-primary" /> Login</h2>
+      <h2 className="section-title justify-center">
+        <FiLogIn className="text-primary" /> Login
+      </h2>
 
-      <form onSubmit={handleCredentialsLogin} className="surface-card p-6 gap-4 reveal">
+      <form
+        onSubmit={handleCredentialsLogin}
+        className="surface-card p-6 gap-4 reveal"
+      >
         {(error || queryErrorMessage) && (
-          <p className="alert alert-error text-sm">{error || queryErrorMessage}</p>
+          <p className="alert alert-error text-sm">
+            {error || queryErrorMessage}
+          </p>
         )}
 
         <label className="form-control w-full">
-          <span className="label-text mb-1 inline-flex items-center gap-1"><FiMail /> Email</span>
+          <span className="label-text mb-1 inline-flex items-center gap-1">
+            <FiMail /> Email
+          </span>
           <input
             type="email"
             className="input input-bordered w-full"
@@ -88,7 +97,9 @@ export default function LoginPage() {
         </label>
 
         <label className="form-control w-full">
-          <span className="label-text mb-1 inline-flex items-center gap-1"><FiLock /> Password</span>
+          <span className="label-text mb-1 inline-flex items-center gap-1">
+            <FiLock /> Password
+          </span>
           <input
             type="password"
             className="input input-bordered w-full"
@@ -99,7 +110,11 @@ export default function LoginPage() {
           />
         </label>
 
-        <button type="submit" className="btn btn-primary w-full soft-glow" disabled={isLoading}>
+        <button
+          type="submit"
+          className="btn btn-primary w-full soft-glow"
+          disabled={isLoading}
+        >
           {isLoading ? "Logging in..." : "Login"}
         </button>
 

@@ -26,7 +26,7 @@ export default function RootLayout({ children }) {
             <main className="container mx-auto mt-18 px-4 mb-6 lg:mb-4 flex-1">
               {children}
             </main>
-            <Toaster position="top-right" reverseOrder={false} />
+            <Toaster position="top-center" reverseOrder={false} />
             <Footer />
           </ThemeProvider>
         </AuthProvider>

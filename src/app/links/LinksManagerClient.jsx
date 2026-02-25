@@ -1,19 +1,19 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import BrandedQrCode from "@/components/utilities/BrandedQrCode";
-
-function statusBadge(status) {
-  if (status === "active") return "badge-success";
-  if (status === "expired") return "badge-error";
-  if (status === "limit_reached") return "badge-warning";
-  return "badge-neutral";
-}
+import toast from "react-hot-toast";
+import LinkCard from "../../components/linksmanager/LinkCard";
+import ExtendModal from "../../components/linksmanager/ExtendModal";
 
 export default function LinksManagerClient({ initialLinks }) {
   const [links, setLinks] = useState(initialLinks || []);
   const [loadingId, setLoadingId] = useState("");
   const [error, setError] = useState("");
+  const [extendModal, setExtendModal] = useState({
+    open: false,
+    link: null,
+    type: "hours",
+  });
 
   const sorted = useMemo(
     () =>
@@ -50,21 +50,67 @@ export default function LinksManagerClient({ initialLinks }) {
     const data = await apiAction(linkId, { action: "revoke" });
     if (!data?.ok) return;
     setLinks((prev) => prev.filter((link) => link.id !== linkId));
+    toast.success("Link revoked!");
   };
 
-  const extend = async (linkId) => {
-    const hours = window.prompt("Extend by how many hours? (1 - 720)", "24");
-    if (!hours) return;
-    const data = await apiAction(linkId, { action: "extend", expiryHours: hours });
+  const openExtendModal = (link, type = "hours") => {
+    setExtendModal({ open: true, link, type });
+  };
+
+  const handleExtendSubmit = async (value) => {
+    if (!extendModal.link) return;
+    const linkId = extendModal.link.id;
+
+    if (extendModal.type === "downloads") {
+      const currentMax = Number(extendModal.link.maxDownloads || 0);
+      const nextMax = currentMax + Number(value || 0);
+      const data = await apiAction(linkId, {
+        action: "update",
+        maxDownloads: nextMax,
+      });
+      if (!data?.ok) return;
+
+      setLinks((prev) =>
+        prev.map((link) =>
+          link.id === linkId
+            ? {
+                ...link,
+                maxDownloads: nextMax,
+                status: "active",
+              }
+            : link,
+        ),
+      );
+      setExtendModal({ open: false, link: null, type: "hours" });
+      toast.success("Download limit extended!");
+      return;
+    }
+
+    const data = await apiAction(linkId, {
+      action: "extend",
+      expiryHours: value,
+    });
     if (!data?.ok) return;
+
     setLinks((prev) =>
-      prev.map((link) => (link.id === linkId ? { ...link, expiresAt: data.expiresAt, status: "active" } : link)),
+      prev.map((link) =>
+        link.id === linkId
+          ? {
+              ...link,
+              expiresAt: data.expiresAt,
+              status: "active",
+            }
+          : link,
+      ),
     );
+    setExtendModal({ open: false, link: null, type: "hours" });
+    toast.success("Link extended!");
   };
 
   const regenerate = async (linkId) => {
     const data = await apiAction(linkId, { action: "regenerate" });
     if (!data?.ok) return;
+
     setLinks((prev) =>
       prev.map((link) =>
         link.id === linkId
@@ -76,76 +122,44 @@ export default function LinksManagerClient({ initialLinks }) {
           : link,
       ),
     );
-  };
-
-  const copy = async (urlPath) => {
-    await navigator.clipboard.writeText(`${window.location.origin}${urlPath}`);
+    toast.success("Link code regenerated!");
   };
 
   if (!sorted.length) {
-    return <p className="opacity-80">No share links yet. Create one from your files page.</p>;
+    return (
+      <div className="bg-base-100 rounded-2xl border border-base-300 p-10 text-center text-base-content/70">
+        <div className="text-lg font-semibold mb-1">No links found</div>
+        <div>Create a share link from your files page to get started.</div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {error && <p className="alert alert-error py-2">{error}</p>}
 
-      {sorted.map((link) => {
-        const fullUrl = `${window.location.origin}${link.urlPath}`;
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {sorted.map((link) => (
+          <LinkCard
+            key={link.id}
+            link={link}
+            onExtend={openExtendModal}
+            onRegenerate={regenerate}
+            onRevoke={revoke}
+            loadingId={loadingId}
+          />
+        ))}
+      </div>
 
-        return (
-          <div key={link.id} className="surface-card p-4 reveal">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold">{link.fileName}</span>
-                  <span className={`badge ${statusBadge(link.status)}`}>{link.status}</span>
-                </div>
-                <p className="text-sm opacity-80">
-                  <a href={link.urlPath} target="_blank" rel="noreferrer" className="link link-primary break-all">
-                    {link.urlPath}
-                  </a>
-                </p>
-                <p className="text-sm opacity-80">
-                  Downloads: {link.downloadCount}
-                  {typeof link.maxDownloads === "number" ? ` / ${link.maxDownloads}` : ""} | Expires:{" "}
-                  {new Date(link.expiresAt).toLocaleString()}
-                </p>
-                {link.hasPassword && <p className="text-xs badge badge-neutral">Password protected</p>}
-              </div>
-
-              <BrandedQrCode value={fullUrl} size={120} />
-            </div>
-
-            <div className="flex flex-wrap gap-2 mt-3">
-              <button className="btn btn-sm btn-outline" onClick={() => copy(link.urlPath)}>
-                Copy
-              </button>
-              <button
-                className="btn btn-sm btn-outline"
-                onClick={() => extend(link.id)}
-                disabled={loadingId === link.id}
-              >
-                Extend
-              </button>
-              <button
-                className="btn btn-sm btn-outline"
-                onClick={() => regenerate(link.id)}
-                disabled={loadingId === link.id}
-              >
-                Regenerate
-              </button>
-              <button
-                className="btn btn-sm btn-error"
-                onClick={() => revoke(link.id)}
-                disabled={loadingId === link.id}
-              >
-                Revoke
-              </button>
-            </div>
-          </div>
-        );
-      })}
+      <ExtendModal
+        open={extendModal.open}
+        onClose={() =>
+          setExtendModal({ open: false, link: null, type: "hours" })
+        }
+        onSubmit={handleExtendSubmit}
+        type={extendModal.type}
+        maxValue={1000}
+      />
     </div>
   );
 }
