@@ -83,15 +83,15 @@ export default function Navbar() {
             { href: "/", label: "Home", icon: FiHome },
             { href: "/dashboard", label: "Dashboard", icon: FiGrid },
             { href: "/upload", label: "Upload", icon: FiUpload },
-            { href: "/files", label: "Files", icon: FiGrid },
+            { href: "/files", label: "Files", icon: FaFolder },
             { href: "/links", label: "Links", icon: FiLink2 },
             { href: "/about", label: "About", icon: FiInfo },
           ]
         : [
             { href: "/", label: "Home", icon: FiHome },
             { href: "/about", label: "About", icon: FiInfo },
-            { href: "/login", label: "Login", icon: FiLogIn },
-            { href: "/signup", label: "Sign Up", icon: FiGrid },
+            { href: "/login", label: "Login", icon: FaSignInAlt },
+            { href: "/signup", label: "Sign Up", icon: FaUserPlus },
           ],
     [isAuthenticated],
   );
@@ -102,13 +102,13 @@ export default function Navbar() {
         ? [
             { href: "/", label: "Home", icon: FiHome },
             { href: "/upload", label: "Upload", icon: FiUpload },
-            { href: "/files", label: "Files", icon: FiGrid },
+            { href: "/files", label: "Files", icon: FaFolder },
             { href: "/links", label: "Links", icon: FiLink2 },
           ]
         : [
             { href: "/", label: "Home", icon: FiHome },
-            { href: "/login", label: "Login", icon: FiLogIn },
-            { href: "/signup", label: "Sign Up", icon: FiGrid },
+            { href: "/login", label: "Login", icon: FaSignInAlt },
+            { href: "/signup", label: "Sign Up", icon: FaUserPlus },
           ],
     [isAuthenticated],
   );
@@ -120,13 +120,13 @@ export default function Navbar() {
             { href: "/", label: "Home", icon: FiHome },
             { href: "/dashboard", label: "Dash", icon: FiGrid },
             { href: "/upload", label: "Upload", icon: FiUpload },
-            { href: "/files", label: "Files", icon: FiGrid },
+            { href: "/files", label: "Files", icon: FaFolder },
             { href: "/links", label: "Links", icon: FiLink2 },
           ]
         : [
             { href: "/", label: "Home", icon: FiHome },
-            { href: "/login", label: "Login", icon: FiLogIn },
-            { href: "/signup", label: "Sign Up", icon: FiGrid },
+            { href: "/login", label: "Login", icon: FaSignInAlt },
+            { href: "/signup", label: "Sign Up", icon: FaUserPlus },
             { href: "/about", label: "About", icon: FiInfo },
             { href: "/contact", label: "Contact", icon: FiLink2 },
           ],
@@ -152,7 +152,7 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-1">
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-1">
             {isAuthenticated ? (
               <>
                 <Link href="/upload" className="btn btn-sm btn-ghost">
@@ -187,13 +187,13 @@ export default function Navbar() {
       </header>
 
       {sidebarOpen && (
-        <div className="fixed inset-0 z-[70] md:hidden">
+        <div className="fixed inset-0 z-180 md:hidden">
           <button
             aria-label="Close Sidebar"
             className="absolute inset-0 bg-black/35"
             onClick={() => setSidebarOpen(false)}
           />
-          <aside className="absolute right-0 top-0 h-full w-72 bg-base-100 border-l border-base-300 p-5 flex flex-col reveal">
+          <aside className="absolute left-0 top-0 h-full w-72 bg-base-100 border-l border-base-300 p-5 flex flex-col reveal">
             <div className="flex items-center justify-between mb-5">
               <p className="font-semibold">Navigation</p>
               <button
