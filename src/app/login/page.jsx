@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { FiLogIn, FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
@@ -24,11 +24,30 @@ function validateEmail(email) {
 }
 
 export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center p-4">
+          <div className="text-center">
+            <div className="loading loading-spinner loading-lg text-primary mb-4" />
+            <p className="text-base-content/70">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <LoginPageClient />
+    </Suspense>
+  );
+}
+
+function LoginPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { status } = useSession();
+
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const authError = searchParams.get("error");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -190,7 +209,9 @@ export default function LoginPage() {
             <button
               type="submit"
               className="btn btn-primary w-full text-white font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isLoading || isGoogleLoading || !!emailError || !!passwordError}
+              disabled={
+                isLoading || isGoogleLoading || !!emailError || !!passwordError
+              }
             >
               <FaSignInAlt />
               {isLoading ? (
