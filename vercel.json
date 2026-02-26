@@ -1,11 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/jobs/cleanup-expired-links",
-      "schedule": "0 * * * *"
-    },
-    {
-      "path": "/api/jobs/cleanup-orphan-files",
+      "path": "/api/jobs/cleanup",
       "schedule": "15 3 * * *"
     }
   ]
