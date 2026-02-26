@@ -7,9 +7,9 @@ const Logo = () => {
     <div className="flex items-center gap-1.5">
       <Image
         src="/logo.png"
-        className="w-auto h-10"
+        className="w-auto h-8"
         alt="Logo"
-        height={500}
+        height={80}
         width={500}
       />
     </div>

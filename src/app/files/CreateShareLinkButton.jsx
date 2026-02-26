@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FaCopy, FaGears, FaShareNodes } from "react-icons/fa6";
 import toast from "react-hot-toast";
+import ErrorMsg from "@/components/utilities/Error";
 
 function toLocalDatetimeValue(date) {
   const pad = (n) => String(n).padStart(2, "0");
@@ -80,7 +81,7 @@ export default function CreateShareLinkButton({ fileId }) {
           <div className="card bg-base-100 w-full max-w-md p-5 gap-3 text-left">
             <h3 className="font-semibold text-lg">Create Share Link</h3>
 
-            {error && <p className="text-error text-sm">{error}</p>}
+            {error && <ErrorMsg message={error} />}
 
             <div className="form-control">
               <label className="label-text pb-1">Expiry date/time</label>

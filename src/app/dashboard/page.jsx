@@ -10,6 +10,7 @@ import { FiBarChart2, FiUpload } from "react-icons/fi";
 import InfoMSg from "@/components/utilities/Info";
 import Image from "next/image";
 import { FaFolder, FaLink } from "react-icons/fa6";
+import LogoutButton from "./LogoutButton";
 
 export const metadata = {
   title: "Dashboard | DRPY",
@@ -175,6 +176,7 @@ export default async function DashboardPage() {
             <FiUpload size={20} />
             Upload Files
           </Link>
+          <LogoutButton />
         </div>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">

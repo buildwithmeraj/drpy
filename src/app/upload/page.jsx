@@ -4,6 +4,7 @@ import ErrorMsg from "@/components/utilities/Error";
 import SuccessMsg from "@/components/utilities/Success";
 import Link from "next/link";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { FaUndoAlt } from "react-icons/fa";
 import { FaFolder } from "react-icons/fa6";
 import {
@@ -23,11 +24,13 @@ function formatBytes(bytes) {
 }
 
 export default function UploadPage() {
+  const maxFileSizeMb = Number(process.env.NEXT_PUBLIC_MAX_FILE_SIZE_MB || 100);
   const [file, setFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const applySelectedFile = (selectedFile) => {
     setError("");
@@ -41,6 +44,30 @@ export default function UploadPage() {
     const selectedFile = event.dataTransfer?.files?.[0] || null;
     applySelectedFile(selectedFile);
   };
+
+  const uploadWithProgress = (formData) =>
+    new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/api/files/upload");
+      xhr.upload.onprogress = (event) => {
+        if (!event.lengthComputable) return;
+        const percent = Math.round((event.loaded / event.total) * 100);
+        setUploadProgress(Math.max(0, Math.min(100, percent)));
+      };
+      xhr.onerror = () =>
+        reject(new Error("Upload failed due to network error."));
+      xhr.onload = () => {
+        const text = xhr.responseText || "{}";
+        let data = {};
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = {};
+        }
+        resolve({ ok: xhr.status >= 200 && xhr.status < 300, data });
+      };
+      xhr.send(formData);
+    });
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -56,21 +83,32 @@ export default function UploadPage() {
     formData.append("file", file);
 
     setIsUploading(true);
+    setUploadProgress(0);
 
-    const response = await fetch("/api/files/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await response.json();
+    let result;
+    try {
+      result = await uploadWithProgress(formData);
+    } catch (uploadError) {
+      setIsUploading(false);
+      setUploadProgress(0);
+      const message =
+        uploadError instanceof Error ? uploadError.message : "Upload failed.";
+      setError(message);
+      toast.error(message);
+      return;
+    }
     setIsUploading(false);
+    setUploadProgress(0);
 
-    if (!response.ok) {
-      setError(data.error || "Upload failed.");
+    if (!result.ok) {
+      const message = result.data?.error || "Upload failed.";
+      setError(message);
+      toast.error(message);
       return;
     }
 
     setSuccess(`${file.name} uploaded successfully.`);
+    toast.success("File uploaded successfully.");
     setFile(null);
   };
 
@@ -89,8 +127,7 @@ export default function UploadPage() {
             </Link>
           </div>
           <p className="opacity-70 mb-2">
-            Upload a file to your cloud storage. Max size{" "}
-            {process.env.NEXT_PUBLIC_MAX_FILE_SIZE_MB || 100}MB.
+            Upload a file to your cloud storage. Max size {maxFileSizeMb}MB.
           </p>
 
           {error && (
@@ -100,7 +137,18 @@ export default function UploadPage() {
             />
           )}
           {success && <SuccessMsg message={success} />}
-
+          {isUploading && (
+            <div className="space-y-2">
+              <progress
+                className="progress progress-primary w-full transition-all duration-300"
+                value={uploadProgress}
+                max="100"
+              />
+              <div className="text-xs text-base-content/70 text-right">
+                {uploadProgress}% uploaded
+              </div>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <label className="flex flex-col gap-2">
               <div className="font-semibold text-base-content pb-2">
@@ -130,7 +178,7 @@ export default function UploadPage() {
                 <p className="font-medium mb-2">
                   Drag and drop file here or click to select
                 </p>
-                <p className="text-sm opacity-70 mb-4">Max 100MB</p>
+                <p className="text-sm opacity-70 mb-4">Max {maxFileSizeMb}MB</p>
                 <input
                   id="file-input"
                   type="file"

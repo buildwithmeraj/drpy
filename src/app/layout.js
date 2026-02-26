@@ -10,8 +10,8 @@ const geist = Geist({ subsets: ["latin"] });
 const geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "DRPY",
-  description: "Your app description here",
+  title: process.env.NEXT_PUBLIC_SITE_NAME || "DRPY",
+  description: `${process.env.NEXT_PUBLIC_SITE_NAME || "DRPY"} - temporary file sharing with privacy-first controls.`,
 };
 
 export default function RootLayout({ children }) {

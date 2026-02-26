@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import LinkCard from "../../components/linksmanager/LinkCard";
 import ExtendModal from "../../components/linksmanager/ExtendModal";
+import ErrorMsg from "@/components/utilities/Error";
 
 export default function LinksManagerClient({ initialLinks }) {
   const [links, setLinks] = useState(initialLinks || []);
@@ -40,6 +41,7 @@ export default function LinksManagerClient({ initialLinks }) {
 
     if (!response.ok) {
       setError(data.error || "Action failed.");
+      toast.error(data.error || "Action failed.");
       return null;
     }
 
@@ -136,7 +138,7 @@ export default function LinksManagerClient({ initialLinks }) {
 
   return (
     <div className="space-y-4">
-      {error && <p className="alert alert-error py-2">{error}</p>}
+      {error && <ErrorMsg message={error} />}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {sorted.map((link) => (

@@ -13,7 +13,10 @@ export default function FoldersSection({
     <div className="card bg-base-200 p-4 space-y-3">
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-lg font-semibold">Folders</h3>
-        <button className="btn btn-sm btn-primary" onClick={onAddFolder}>
+        <button
+          className="btn btn-sm btn-info text-white"
+          onClick={onAddFolder}
+        >
           <FaFolderPlus />
           Add Folder
         </button>

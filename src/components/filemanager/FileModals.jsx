@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { getPreviewMode } from "../../app/files/utils";
+import WarningMsg from "../utilities/Warning";
 
 export function ConfirmDeleteModal({
   open,
@@ -301,11 +302,7 @@ export function PreviewModal({ file, open, onClose }) {
           </video>
         )}
 
-        {!previewMode && (
-          <p className="alert alert-warning">
-            Preview is not available for this file type.
-          </p>
-        )}
+        {!previewMode && <WarningMsg message="Preview is not available for this file type." />}
       </div>
     </div>
   );

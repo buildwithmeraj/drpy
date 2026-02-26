@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
+  FiBarChart2,
   FiGrid,
   FiHome,
   FiInfo,
@@ -15,7 +16,8 @@ import {
 import { signOut, useSession } from "next-auth/react";
 import Logo from "../utilities/Logo";
 import ThemeSwitcher from "../utilities/ThemeSwitcher";
-import { FaLink, FaFolder } from "react-icons/fa6";
+import { FaLink, FaFolder, FaUserPlus } from "react-icons/fa6";
+import { FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
 
 function AvatarButton({ session }) {
   const fallback = (session?.user?.name || session?.user?.email || "U")
@@ -41,19 +43,28 @@ function AvatarButton({ session }) {
 
 function ProfileDropdown({ session }) {
   return (
-    <div className="dropdown dropdown-end">
-      <button tabIndex={0} className="btn btn-ghost btn-circle">
+    <div className="dropdown dropdown-center">
+      <button tabIndex={0} className="avatar cursor-pointer">
         <AvatarButton session={session} />
       </button>
       <ul
         tabIndex={0}
-        className="menu menu-sm dropdown-content z-[60] mt-2 p-2 shadow bg-base-100 rounded-box w-44 border border-base-300"
+        className="menu menu-sm dropdown-content z-60 mt-2 p-2 shadow bg-base-100 rounded-box w-44 border border-base-300"
       >
         <li>
-          <Link href="/dashboard">Dashboard</Link>
+          <Link href="/dashboard">
+            <FiBarChart2 className="inline" />
+            Dashboard
+          </Link>
         </li>
         <li>
-          <button onClick={() => signOut({ callbackUrl: "/" })}>Logout</button>
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="text-error"
+          >
+            <FaSignOutAlt />
+            Logout
+          </button>
         </li>
       </ul>
     </div>
@@ -141,7 +152,7 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-1">
-          <div className="hidden lg:flex items-center gap-2">
+          <div className="hidden lg:flex items-center gap-1">
             {isAuthenticated ? (
               <>
                 <Link href="/upload" className="btn btn-sm btn-ghost">
@@ -157,16 +168,15 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link href="/about" className="btn btn-sm btn-ghost">
-                  About
-                </Link>
                 <Link href="/login" className="btn btn-sm btn-ghost">
+                  <FaSignInAlt />
                   Login
                 </Link>
                 <Link
                   href="/signup"
                   className="btn btn-sm btn-primary soft-glow"
                 >
+                  <FaUserPlus />
                   Sign Up
                 </Link>
               </>

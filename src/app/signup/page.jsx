@@ -28,6 +28,7 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [nameTouched, setNameTouched] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
@@ -101,6 +102,7 @@ export default function SignupPage() {
   };
 
   const handleGoogleSignup = async () => {
+    setIsGoogleLoading(true);
     await signIn("google", { callbackUrl: "/" });
   };
 
@@ -141,9 +143,7 @@ export default function SignupPage() {
               </h2>
             </div>
           </div>
-          {(error || queryErrorMessage) && (
-            <ErrorMsg message={error || queryErrorMessage} />
-          )}
+          {error && <ErrorMsg message={error} />}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex flex-col gap-1.5">
@@ -268,6 +268,7 @@ export default function SignupPage() {
               className="btn btn-primary w-full text-white font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={
                 isLoading ||
+                isGoogleLoading ||
                 !!nameError ||
                 !!emailError ||
                 !!passwordError ||
@@ -291,10 +292,17 @@ export default function SignupPage() {
             type="button"
             className="btn btn-outline w-full text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleGoogleSignup}
-            disabled={isLoading}
+            disabled={isLoading || isGoogleLoading}
           >
             <FaGoogle size={18} className="mb-0.5" />
-            Continue with Google
+            {isGoogleLoading ? (
+              <>
+                <span className="loading loading-spinner loading-sm" />
+                Redirecting...
+              </>
+            ) : (
+              "Continue with Google"
+            )}
           </button>
           <div className="text-center">
             <p className="text-sm text-base-content/70">

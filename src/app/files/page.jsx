@@ -106,12 +106,12 @@ export default async function FilesPage() {
           <FiFolder className="text-primary" size={24} /> My Files
         </h2>
         <div className="flex gap-2">
-          <Link href="/links" className="btn btn-outline">
+          <Link href="/links" className="btn btn-sm btn-info btn-soft">
             {" "}
             <FaLink size={20} />
             Links
           </Link>
-          <Link href="/upload" className="btn btn-primary">
+          <Link href="/upload" className="btn btn-sm btn-success text-white">
             <FiUpload size={20} />
             Upload File
           </Link>

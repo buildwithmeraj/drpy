@@ -8,6 +8,7 @@ import { FiLogIn, FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { FaGoogle } from "react-icons/fa6";
 import { FaSignInAlt } from "react-icons/fa";
 import ErrorMsg from "@/components/utilities/Error";
+import InfoMsg from "@/components/utilities/Info";
 
 const errorMessages = {
   AccessDenied: "Access denied. Please try again.",
@@ -32,6 +33,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -78,12 +80,14 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = async () => {
+    setIsGoogleLoading(true);
     await signIn("google", { callbackUrl });
   };
 
   const queryErrorMessage = authError
     ? errorMessages[authError] || errorMessages.Default
     : "";
+  const requiresLoginNotice = callbackUrl && callbackUrl !== "/";
 
   if (status === "loading" || status === "authenticated") {
     return (
@@ -117,6 +121,9 @@ export default function LoginPage() {
           </div>
           {(error || queryErrorMessage) && (
             <ErrorMsg message={error || queryErrorMessage} />
+          )}
+          {requiresLoginNotice && (
+            <InfoMsg message="Please login first to continue to your requested page." />
           )}
           <form onSubmit={handleCredentialsLogin} className="space-y-4">
             <div className="flex flex-col gap-1.5">
@@ -183,7 +190,7 @@ export default function LoginPage() {
             <button
               type="submit"
               className="btn btn-primary w-full text-white font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isLoading || !!emailError || !!passwordError}
+              disabled={isLoading || isGoogleLoading || !!emailError || !!passwordError}
             >
               <FaSignInAlt />
               {isLoading ? (
@@ -203,10 +210,17 @@ export default function LoginPage() {
             type="button"
             className="btn btn-outline w-full text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleGoogleLogin}
-            disabled={isLoading}
+            disabled={isLoading || isGoogleLoading}
           >
             <FaGoogle size={18} className="mb-0.5" />
-            Continue with Google
+            {isGoogleLoading ? (
+              <>
+                <span className="loading loading-spinner loading-sm" />
+                Redirecting...
+              </>
+            ) : (
+              "Continue with Google"
+            )}
           </button>
           <div className="text-center">
             <p className="text-sm text-base-content/70">

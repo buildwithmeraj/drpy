@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { DEFAULT_QUOTA_BYTES } from "@/lib/quota";
+import toast from "react-hot-toast";
 import { normalizeFolderValue, sortFolders, toFolderAliasId } from "./utils";
 import {
   ConfirmDeleteModal,
@@ -15,6 +16,7 @@ import FilesTable from "@/components/filemanager/FilesTable";
 import FilesToolbar from "@/components/filemanager/FilesToolbar";
 import FoldersSection from "@/components/filemanager/FoldersSection";
 import StorageCard from "@/components/filemanager/StorageCard";
+import ErrorMsg from "@/components/utilities/Error";
 
 export default function FilesManagerClient({
   initialFiles,
@@ -211,13 +213,15 @@ export default function FilesManagerClient({
       });
       const data = await response.json().catch(() => ({}));
       setActionLoading(false);
-      if (!response.ok) {
-        setError(data.error || "Delete failed.");
-        return;
-      }
-      removeFromState(ids);
+    if (!response.ok) {
+      setError(data.error || "Delete failed.");
+      toast.error(data.error || "Delete failed.");
       return;
     }
+    removeFromState(ids);
+    toast.success("File deleted.");
+    return;
+  }
 
     const response = await fetch("/api/files/bulk-delete", {
       method: "POST",
@@ -228,9 +232,11 @@ export default function FilesManagerClient({
     setActionLoading(false);
     if (!response.ok) {
       setError(data.error || "Bulk delete failed.");
+      toast.error(data.error || "Bulk delete failed.");
       return;
     }
     removeFromState(ids);
+    toast.success("Selected files deleted.");
   };
 
   const performMove = async (ids, folder) => {
@@ -253,6 +259,7 @@ export default function FilesManagerClient({
       setActionLoading(false);
       if (!response.ok) {
         setError(data.error || "Could not move file.");
+        toast.error(data.error || "Could not move file.");
         return;
       }
       setFiles((prev) =>
@@ -261,6 +268,7 @@ export default function FilesManagerClient({
         ),
       );
       setSelected((prev) => prev.filter((id) => id !== ids[0]));
+      toast.success("File moved.");
       return;
     }
 
@@ -273,6 +281,7 @@ export default function FilesManagerClient({
     setActionLoading(false);
     if (!response.ok) {
       setError(data.error || "Bulk move failed.");
+      toast.error(data.error || "Bulk move failed.");
       return;
     }
     setFiles((prev) =>
@@ -281,6 +290,7 @@ export default function FilesManagerClient({
       ),
     );
     setSelected((prev) => prev.filter((id) => !ids.includes(id)));
+    toast.success("Selected files moved.");
   };
 
   const createFolder = async (name) => {
@@ -297,10 +307,12 @@ export default function FilesManagerClient({
 
     if (!response.ok) {
       setError(data.error || "Could not create folder.");
+      toast.error(data.error || "Could not create folder.");
       return false;
     }
 
     setFolders((prev) => [...prev, data.folder].sort(sortFolders));
+    toast.success("Folder created.");
     return true;
   };
 
@@ -318,6 +330,7 @@ export default function FilesManagerClient({
 
     if (!response.ok) {
       setError(data.error || "Could not rename folder.");
+      toast.error(data.error || "Could not rename folder.");
       return false;
     }
 
@@ -346,6 +359,7 @@ export default function FilesManagerClient({
       setFolderFilter(updatedName);
     }
     await refreshFolders();
+    toast.success("Folder renamed.");
     return true;
   };
 
@@ -361,6 +375,7 @@ export default function FilesManagerClient({
 
     if (!response.ok) {
       setError(data.error || "Could not delete folder.");
+      toast.error(data.error || "Could not delete folder.");
       return false;
     }
 
@@ -379,6 +394,7 @@ export default function FilesManagerClient({
       setFolderFilter("all");
     }
     await refreshFolders();
+    toast.success("Folder deleted.");
     return true;
   };
 
@@ -479,7 +495,7 @@ export default function FilesManagerClient({
         onDeleteSelected={() => setDeleteTargetIds(selected)}
       />
 
-      {error && <p className="alert alert-error py-2">{error}</p>}
+      {error && <ErrorMsg message={error} />}
 
       <FilesTable
         files={filtered}

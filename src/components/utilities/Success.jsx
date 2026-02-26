@@ -5,7 +5,7 @@ const SuccessMsg = ({ message }) => {
   return (
     <div
       role="alert"
-      className="alert alert-success alert-soft mt-2 text-lg p-4"
+      className="alert alert-success alert-soft mt-2 text-lg p-4 break-all"
     >
       <FaCircleCheck className="-mr-1" size={18} />
       {message}

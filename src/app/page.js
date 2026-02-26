@@ -11,7 +11,7 @@ import {
 
 export default function Home() {
   return (
-    <div className="page-shell space-y-8 md:space-y-10">
+    <div className="space-y-8">
       <HomeHero />
       <HomeStats />
       <HomeFeatures />

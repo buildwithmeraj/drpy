@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# DRPY
+
+Temporary file sharing with privacy-first controls.
+
+## Tech Stack
+- Next.js (App Router)
+- NextAuth.js (credentials + Google)
+- MongoDB
+- Cloudflare R2 (single or multi-account)
+- Tailwind CSS + DaisyUI
+
+## Features
+- Auth: email/password + Google
+- Upload with quota checks and progress
+- File manager: folders, search/sort/filter, bulk actions, preview
+- Share links: expiry, password, max downloads, regenerate, revoke
+- My Links page with QR codes
+- Dashboard analytics (downloads, bandwidth, top links/files)
+- Cleanup jobs for expired/orphan data
 
 ## Getting Started
-
-First, run the development server:
-
+1. Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Copy env file:
+```bash
+cp .env.example .env
+```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+3. Fill required values in `.env` (DB, auth, R2, SMTP).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Run dev server:
+```bash
+npm run dev
+```
 
-## Learn More
+App runs at `http://localhost:3000`.
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Environment Notes
+- `R2_ACCOUNTS_JSON` is optional. If set, it overrides single-account `R2_*` vars.
+- Global storage cap is enforced using configured R2 account count.
+- Contact form requires SMTP + `ADMIN_EMAIL`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Main Routes
+- `/` home
+- `/login`, `/signup`
+- `/dashboard`
+- `/upload`
+- `/files`
+- `/links`
+- `/s/[code]` public share page
+- `/about`, `/privacy`, `/tos`, `/contact`
