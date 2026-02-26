@@ -29,7 +29,7 @@ function statusMeta(meta, error) {
       };
     }
     return {
-      label: "Link active",
+      label: "Active",
       classes: "bg-primary/10 text-primary border border-primary/20",
     };
   }
