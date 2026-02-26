@@ -40,7 +40,7 @@ export default function LinkCard({
   return (
     <>
       <div
-        className={`bg-base-100 rounded-2xl border border-base-300 shadow-sm p-5 flex flex-col gap-3 transition-opacity ${
+        className={`min-w-0 bg-base-100 rounded-2xl border border-base-300 shadow-sm p-3 lg:p-5 flex flex-col gap-3 transition-opacity ${
           expired ? "opacity-60" : ""
         }`}
       >
@@ -65,18 +65,18 @@ export default function LinkCard({
           </div>
         </div>
 
-        <div className="bg-base-200 border border-base-300 rounded-xl p-2 flex flex-col gap-1.5">
-          <div className="flex items-center gap-2">
-            <div className="flex flex-col">
+        <div className="bg-base-200 border border-base-300 rounded-xl p-2 flex flex-col gap-1.5 min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex flex-col min-w-0 flex-1">
               <span className="text-sm text-base-content/60 font-medium">
                 Share URL
               </span>
-              <div className="flex items-center">
+              <div className="flex items-center min-w-0 justify-end">
                 <Link
                   href={link.urlPath}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-primary text-sm truncate flex-1 hover:underline"
+                  className="text-primary text-sm truncate min-w-0 flex-1 hover:underline"
                 >
                   <Image
                     src="/icon.svg"
@@ -87,16 +87,16 @@ export default function LinkCard({
                   />
                   {link.urlPath}
                 </Link>
-                <button
-                  onClick={copy}
-                  className="shrink-0 p-1.5 text-blue-500 cursor-pointer btn btn-circle btn-soft btn-sm rounded-full ml-2"
-                  title="Copy link"
-                >
-                  <FaCopy size={14} />
-                </button>
               </div>
             </div>
-            <div className="flex justify-end flex-1">
+            <div className="flex justify-end flex-col gap-2 shrink-0">
+              <button
+                onClick={copy}
+                className="btn btn-info text-white btn-sm"
+                title="Copy link"
+              >
+                <FaCopy /> Copy Link
+              </button>
               <button
                 type="button"
                 className="btn btn-sm btn-primary text-white flex items-center gap-1"
@@ -144,9 +144,9 @@ export default function LinkCard({
           </div>
         </div>
 
-        <div className="flex gap-2 pt-1 justify-between">
+        <div className="grid grid-cols-3 gap-2 pt-1">
           <button
-            className="btn btn-primary text-white disabled:cursor-not-allowed flex-1"
+            className="btn btn-primary text-white disabled:cursor-not-allowed w-full"
             onClick={() =>
               onExtend(
                 link,
@@ -163,7 +163,7 @@ export default function LinkCard({
             Extend
           </button>
           <button
-            className="btn btn-info text-white disabled:cursor-not-allowed flex-1"
+            className="btn btn-info text-white disabled:cursor-not-allowed w-full"
             onClick={() => onRegenerate(link.id)}
             disabled={loadingId === link.id || expired}
           >
@@ -171,7 +171,7 @@ export default function LinkCard({
             Regenerate
           </button>
           <button
-            className="btn btn-error text-white disabled:cursor-not-allowed flex-1"
+            className="btn btn-error text-white disabled:cursor-not-allowed w-full"
             onClick={() => onRevoke(link.id)}
             disabled={loadingId === link.id}
           >

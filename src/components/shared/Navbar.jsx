@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
   FiBarChart2,
+  FiFolder,
   FiGrid,
   FiHome,
   FiInfo,
@@ -83,7 +84,7 @@ export default function Navbar() {
             { href: "/", label: "Home", icon: FiHome },
             { href: "/dashboard", label: "Dashboard", icon: FiGrid },
             { href: "/upload", label: "Upload", icon: FiUpload },
-            { href: "/files", label: "Files", icon: FaFolder },
+            { href: "/files", label: "Files", icon: FiFolder },
             { href: "/links", label: "Links", icon: FiLink2 },
             { href: "/about", label: "About", icon: FiInfo },
           ]
@@ -102,7 +103,7 @@ export default function Navbar() {
         ? [
             { href: "/", label: "Home", icon: FiHome },
             { href: "/upload", label: "Upload", icon: FiUpload },
-            { href: "/files", label: "Files", icon: FaFolder },
+            { href: "/files", label: "Files", icon: FiFolder },
             { href: "/links", label: "Links", icon: FiLink2 },
           ]
         : [
@@ -120,7 +121,7 @@ export default function Navbar() {
             { href: "/", label: "Home", icon: FiHome },
             { href: "/dashboard", label: "Dash", icon: FiGrid },
             { href: "/upload", label: "Upload", icon: FiUpload },
-            { href: "/files", label: "Files", icon: FaFolder },
+            { href: "/files", label: "Files", icon: FiFolder },
             { href: "/links", label: "Links", icon: FiLink2 },
           ]
         : [
