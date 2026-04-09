@@ -9,6 +9,10 @@ import {
   HomeTrust,
 } from "@/components/home";
 
+export const metadata = {
+  title: "DRPY - Temporary File Sharing",
+};
+
 export default function Home() {
   return (
     <div className="space-y-8">

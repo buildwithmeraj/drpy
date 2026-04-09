@@ -10,8 +10,8 @@
   --color-base-200: oklch(98% 0 0);
   --color-base-300: oklch(95% 0 0);
   --color-base-content: oklch(21% 0.006 285.885);
-  --color-primary: oklch(60% 0.118 184.704);
-  --color-primary-content: oklch(98% 0.003 247.858);
+  --color-primary: #006ed4;
+  --color-primary-content: #ffffff;
   --color-secondary: oklch(62% 0.19 37.26);
   --color-secondary-content: oklch(98% 0.003 247.858);
   --color-accent: #0089ba;
@@ -45,8 +45,8 @@
   --color-base-200: oklch(27% 0.033 256.848);
   --color-base-300: oklch(37% 0 0);
   --color-base-content: oklch(97.807% 0.029 256.847);
-  --color-primary: oklch(58.9% 0.191 254.46);
-  --color-primary-content: oklch(98% 0.003 247.858);
+  --color-primary: #006ed4;
+  --color-primary-content: #ffffff;
   --color-secondary: oklch(62% 0.19 37.26);
   --color-secondary-content: oklch(98% 0.003 247.858);
   --color-accent: #0089ba;
@@ -142,4 +142,12 @@ label:not(.btn) {
   .reveal {
     animation: none;
   }
+}
+
+/* Force exact primary tokens for both app themes. */
+:root,
+[data-theme="light"],
+[data-theme="dark"] {
+  --color-primary: #006ed4;
+  --color-primary-content: #ffffff;
 }
