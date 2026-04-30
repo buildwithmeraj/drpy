@@ -47,9 +47,9 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="page-shell max-w-4xl">
-      <div className="mb-12">
-        <div className="flex items-center gap-3 mb-4">
+    <div className="max-w-xl mx-auto">
+      <div className="mb-4">
+        <div className="flex items-center gap-3 mb-1">
           <div className="p-3 bg-primary/10 rounded-lg">
             <FiMail className="text-primary text-2xl" />
           </div>

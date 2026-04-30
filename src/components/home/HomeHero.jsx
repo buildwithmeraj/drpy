@@ -15,8 +15,8 @@ export default function HomeHero() {
       <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-2xl" />
       <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-primary/20 blur-2xl" />
 
-      <div className="relative max-w-3xl space-y-5">
-        <p className="uppercase tracking-widest text-xs md:text-sm text-white/80">
+      <div className="relative max-w-3xl space-y-2">
+        <p className="font-semibold  text-lg text-white/80">
           Drop it. Share it. Drpy it.
         </p>
         <h1 className="text-4xl md:text-6xl font-black leading-tight">
