@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import { FiDownload, FiEye, FiCopy, FiLock, FiX } from "react-icons/fi";
 import { FaRegFileAlt } from "react-icons/fa";
 import ErrorMsg from "@/components/utilities/Error";
@@ -300,10 +301,13 @@ export default function ShareDownloadClient({
           </div>
           <div className="divider mt-1"></div>
           {previewMode === "image" && (
-            <img
+            <Image
               src={previewUrl}
               alt="Preview"
+              width={1200}
+              height={800}
               className="max-h-[70vh] w-auto rounded-lg mx-auto"
+              unoptimized
             />
           )}
           {previewMode === "pdf" && (

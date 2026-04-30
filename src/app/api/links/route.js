@@ -5,6 +5,7 @@ import { authOptions } from "@/auth";
 import { getDb } from "@/lib/db";
 import { assertCsrf } from "@/lib/security";
 import { generateShareCode, isExpired } from "@/lib/shareLinks";
+import { insertLinkWithRetry } from "@/lib/linkInsertRetry";
 import { toSafeInt } from "@/lib/validation";
 import { resolveSessionUser } from "@/lib/userQuota";
 
@@ -53,9 +54,21 @@ export async function GET() {
       .aggregate([
         { $match: { userId: user._id.toString() } },
         {
+          $addFields: {
+            fileObjectId: {
+              $convert: {
+                input: "$fileId",
+                to: "objectId",
+                onError: null,
+                onNull: null,
+              },
+            },
+          },
+        },
+        {
           $lookup: {
             from: "files",
-            let: { fileObjectId: { $toObjectId: "$fileId" } },
+            let: { fileObjectId: "$fileObjectId" },
             pipeline: [{ $match: { $expr: { $eq: ["$_id", "$$fileObjectId"] } } }],
             as: "file",
           },
@@ -143,25 +156,32 @@ export async function POST(request) {
       return Response.json({ error: "File not found." }, { status: 404 });
     }
 
-    const code = await createUniqueCode(db);
     const expiresAt = new Date(Date.now() + expiryHours * 60 * 60 * 1000);
     const hasPassword = Boolean(password);
     const passwordHash = hasPassword ? await bcrypt.hash(password, 12) : null;
-    const now = new Date();
-
-    await db.collection("links").insertOne({
-      code,
-      userId: user._id.toString(),
-      fileId: file._id.toString(),
-      hasPassword,
-      passwordHash,
-      expiresAt,
-      maxDownloads,
-      downloadCount: 0,
-      lastDownloadedAt: null,
-      createdAt: now,
-      updatedAt: now,
+    const result = await insertLinkWithRetry({
+      db,
+      createCode: () => createUniqueCode(db),
+      payloadBase: {
+        userId: user._id.toString(),
+        fileId: file._id.toString(),
+        hasPassword,
+        passwordHash,
+        expiresAt,
+        maxDownloads,
+        downloadCount: 0,
+        lastDownloadedAt: null,
+      },
+      maxAttempts: 5,
     });
+
+    if (!result.inserted) {
+      return Response.json(
+        { error: "Could not allocate a unique share code. Please retry." },
+        { status: 503 },
+      );
+    }
+    const code = result.code;
 
     return Response.json(
       {

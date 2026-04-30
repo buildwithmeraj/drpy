@@ -4,7 +4,10 @@ import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/db";
 import { hashIp } from "@/lib/analytics";
 import { resolveR2ForFile } from "@/lib/r2";
+import { claimDownloadSlot } from "@/lib/downloadGate";
+import { enforceShareRateLimit } from "@/lib/shareRateLimit";
 import { getShareMetaByCode } from "@/lib/shareLookup";
+import { logApiError } from "@/lib/serverLog";
 
 export const runtime = "nodejs";
 
@@ -13,11 +16,15 @@ function sanitizeFilename(filename) {
 }
 
 export async function POST(request, { params }) {
+  let requestCode = null;
   try {
     const { code } = await params;
+    requestCode = code;
     if (!code) {
       return Response.json({ error: "Invalid link." }, { status: 400 });
     }
+    const rateLimitError = enforceShareRateLimit(request, code, "download");
+    if (rateLimitError) return rateLimitError;
 
     const body = await request.json().catch(() => ({}));
     const password = body?.password?.trim() || "";
@@ -71,13 +78,14 @@ export async function POST(request, { params }) {
         ? object.Body.transformToWebStream()
         : object.Body;
 
-    await db.collection("links").updateOne(
-      { _id: link._id },
-      {
-        $inc: { downloadCount: 1 },
-        $set: { updatedAt: new Date(), lastDownloadedAt: new Date() },
-      },
-    );
+    const downloadGate = await claimDownloadSlot({ db, linkId: link._id });
+
+    if (!downloadGate) {
+      return Response.json(
+        { error: "Download limit reached or link expired." },
+        { status: 410 },
+      );
+    }
 
     const forwardedFor = request.headers.get("x-forwarded-for");
     const clientIp = forwardedFor?.split(",")?.[0]?.trim() || request.headers.get("x-real-ip");
@@ -108,6 +116,10 @@ export async function POST(request, { params }) {
       headers,
     });
   } catch (error) {
+    logApiError("share.download.failed", {
+      code: requestCode,
+      error,
+    });
     return Response.json(
       {
         error: "Could not download file.",

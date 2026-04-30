@@ -4,15 +4,21 @@ import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/db";
 import { resolveR2ForFile } from "@/lib/r2";
 import { getShareMetaByCode } from "@/lib/shareLookup";
+import { enforceShareRateLimit } from "@/lib/shareRateLimit";
+import { logApiError } from "@/lib/serverLog";
 
 export const runtime = "nodejs";
 
 export async function POST(request, { params }) {
+  let requestCode = null;
   try {
     const { code } = await params;
+    requestCode = code;
     if (!code) {
       return Response.json({ error: "Invalid link." }, { status: 400 });
     }
+    const rateLimitError = enforceShareRateLimit(request, code, "content");
+    if (rateLimitError) return rateLimitError;
 
     const body = await request.json().catch(() => ({}));
     const password = body?.password?.trim() || "";
@@ -72,6 +78,10 @@ export async function POST(request, { params }) {
       },
     });
   } catch (error) {
+    logApiError("share.content.failed", {
+      code: requestCode,
+      error,
+    });
     return Response.json(
       {
         error: "Could not load preview content.",

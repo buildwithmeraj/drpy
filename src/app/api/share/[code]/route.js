@@ -1,14 +1,20 @@
 import { getDb } from "@/lib/db";
 import { getShareMetaByCode } from "@/lib/shareLookup";
+import { enforceShareRateLimit } from "@/lib/shareRateLimit";
+import { logApiError } from "@/lib/serverLog";
 
 export const runtime = "nodejs";
 
-export async function GET(_request, { params }) {
+export async function GET(request, { params }) {
+  let requestCode = null;
   try {
     const { code } = await params;
+    requestCode = code;
     if (!code) {
       return Response.json({ error: "Invalid link." }, { status: 400 });
     }
+    const rateLimitError = enforceShareRateLimit(request, code, "meta");
+    if (rateLimitError) return rateLimitError;
 
     const db = await getDb();
 
@@ -23,6 +29,10 @@ export async function GET(_request, { params }) {
       link: meta.data.link,
     });
   } catch (error) {
+    logApiError("share.meta.failed", {
+      code: requestCode,
+      error,
+    });
     return Response.json(
       {
         error: "Could not load share link.",

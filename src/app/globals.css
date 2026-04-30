@@ -3,7 +3,7 @@
 
 @plugin "daisyui/theme" {
   name: "light";
-  default: true;
+  default: false;
   prefersdark: false;
   color-scheme: "light";
   --color-base-100: oklch(100% 0 0);
@@ -71,21 +71,6 @@
   --noise: 0;
 }
 
-body {
-  background:
-    radial-gradient(
-      1200px 500px at -15% -20%,
-      color-mix(in oklab, var(--color-primary) 20%, transparent),
-      transparent 55%
-    ),
-    radial-gradient(
-      1000px 500px at 115% -10%,
-      color-mix(in oklab, var(--color-secondary) 22%, transparent),
-      transparent 58%
-    ),
-    var(--color-base-100);
-}
-
 h1 {
   @apply text-3xl md:text-4xl font-black tracking-tight;
 }
@@ -142,12 +127,4 @@ label:not(.btn) {
   .reveal {
     animation: none;
   }
-}
-
-/* Force exact primary tokens for both app themes. */
-:root,
-[data-theme="light"],
-[data-theme="dark"] {
-  --color-primary: #006ed4;
-  --color-primary-content: #ffffff;
 }

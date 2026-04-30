@@ -1,4 +1,7 @@
-# DRPY
+<h1 align="left">
+  <img src="public/icon.svg" alt="DRPY Icon" width="32" height="32" style="vertical-align: middle;" />
+  <span style="vertical-align: middle;">DRPY</span>
+</h1>
 
 Temporary file sharing with privacy-first controls.
 
